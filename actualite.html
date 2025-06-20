@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualité</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/actualite.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+  <header>
+  <!-- Logo -->
+  <img src="image/actu1.png" alt="Logo devplus" class="logo" />
+
+  <!-- Menu principal -->
+  <nav aria-label="Menu principal">
+    <ul>
+      <li><a href="page_accueil.html">Accueil</a></li>
+      <li><a href="langage.html">Langages</a></li>
+      <li><a href="learder.html">Learder</a></li>
+
+      <!-- Menu déroulant -->
+      <li class="dropdown">
+        <a href="technologie.html" class="dropbtn">Technologies ▼</a>
+        <ul class="dropdown-content">
+          <li><a href="web.html">Web</a></li>
+          <li><a href="ia.html">IA</a></li>
+          <li><a href="systeme_embarque.html">Système embarqué</a></li>
+          <li><a href="mobile.html">Mobile</a></li>
+          <li><a href="desktop.html">Desktop</a></li>
+        </ul>
+      </li>
+
+      <li><a href="communaute.html">Communauté</a></li>
+      <li><a href="actualite.html">Actualité</a></li>
+      <li><a href="a_propos.html">A Propos</a></li>
+    </ul>
+  </nav>
+
+  <!-- Boutons Connexion / Inscription -->
+  <div class="auth_user">
+    <a href="se_connecter.html"><button class="bn1">Se connecter</button></a>
+    <a href="s_inscrire.html"><button class="bn2">S'inscrire</button></a>
+  </div>
+</header>
+
+  <!-- Script pour activer dynamiquement-->
+  <script>
+          const links = document.querySelectorAll("nav ul li a");
+          const currentPage = window.location.pathname.split("/").pop();
+
+          links.forEach(link => {
+          const href = link.getAttribute("href");
+          if (href === currentPage) {
+          link.classList.add("active");
+            }
+           });
+  </script>
+    
+  <main>
+        <section class="Bienvenue_techno">
+  <div class="Bienvenue-technologie">
+    <h1 class="animate-zoom">Dernières Actualités Technologiques</h1>
+    <p class="animate-zoom">
+      Restez informé(e) des dernières avancées en intelligence artificielle, cybersécurité, innovations web, objets connectés et bien plus. Découvrez ce qui façonne le futur dès aujourd’hui.
+    </p>
+  </div>
+</section>
+<section class="actualites">
+  <div class="titre-principal">
+    <h1>Dernières Actualités</h1>
+    <p>Explorez les faits marquants du monde numérique : innovations, tendances et projets en développement.</p>
+  </div>
+
+  <div class="actus-list">
+
+    <article class="actu">
+      <img src="image/webinar.jpeg" alt="Webinaire IA">
+      <div class="contenu">
+        <h2>L’IA Générative bouleverse les outils créatifs</h2>
+        <span class="date">Publié le 19 Juin 2025</span>
+        <p>De nouveaux générateurs d’images et de texte révolutionnent le design, l’écriture et la création de contenu. Découvrez leurs impacts.</p>
+        <a href="#">Lire la suite</a>
+      </div>
+    </article>
+
+    <article class="actu">
+      <img src="image/blockchain.png" alt="Blockchain">
+      <div class="contenu">
+        <h2>Blockchain & Web 3.0 : vers une nouvelle ère du web</h2>
+        <span class="date">Publié le 16 Juin 2025</span>
+        <p>Décentralisation, sécurité, autonomie... Découvrez comment le Web 3.0 redéfinit l’expérience en ligne.</p>
+        <a href="#">Lire la suite</a>
+      </div>
+    </article>
+
+    <article class="actu">
+      <img src="image/La_Realite_Mixte.webp" alt="Réalité augmentée">
+      <div class="contenu">
+        <h2>La Réalité Mixte s’invite dans la formation</h2>
+        <span class="date">Publié le 13 Juin 2025</span>
+        <p>Les technologies XR gagnent du terrain dans l'éducation, la médecine et l'industrie. Zoom sur leurs applications concrètes.</p>
+        <a href="#">Lire la suite</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+<section class="newsletter-section">
+  <div class="newsletter-container">
+    <h2>Abonnez-vous à Notre Newsletter</h2>
+    <p>Recevez les dernières actualités et mises à jour directement dans votre boîte mail.</p>
+
+    <form class="newsletter-form">
+      <input type="email" placeholder="Votre adresse email" required>
+      <button type="submit">S’abonner</button>
+    </form>
+  </div>
+</section>
+
+
+
+    </main>
+    <!--  Pied de page-->
+  <footer>
+    <section class="footer-1">
+        <!-- Logo et description -->
+        <div class="footer-box about">
+                  <img src="image/actu1.png" alt="Logo FOBA" class="footer-logo">
+                  <h1>FOBA</h1>
+                  <p>
+                      Découvrez l'univers passionnant des langages de programmation, leurs créateurs
+                      et les technologies qui façonnent notre monde numérique.
+                  </p>
+            <div class="footer-socials">
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></a>
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn"></a>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+            <div class="footer-box">
+                <h2>Navigation</h2>
+                <ul>
+                    <li><a href="page_accueil.html">Accueil</a></li>
+                    <li><a href="langages.html">Langages</a></li>
+                    <li><a href="leader.html">Leaders</a></li>
+                    <li><a href="technologie.html">Technologies</a></li>
+                </ul>
+            </div>
+
+        <!-- Ressources -->
+            <div class="footer-box">
+                <h2>Ressources</h2>
+                <ul>
+                    <li><a href="communaute.html">Communauté</a></li>
+                    <li><a href="actualite.html">Actualité</a></li>
+                    <li><a href="a_propos.html">À propos</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+
+        <!-- Newsletter -->
+            <div class="footer-box newsletter">
+                <h2>Newsletter</h2>
+                <p>Recevez les dernières actualités sur les langages de programmation.</p>
+                <form>
+                    <input type="email" placeholder="Votre email" required>
+                    <button type="submit">OK</button>
+                </form>
+            </div>
+    </section>
+
+            <div class="footer-tdr">
+                <p>© 2025 Foba. Tous droits réservés.</p>
+            </div>
+</footer>
+</body>
+</html>

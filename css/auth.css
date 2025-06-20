@@ -1,0 +1,72 @@
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #f2f2f2, #e6e6e6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+/* Se connecter/ s'inscrire */
+.auth-container {
+  background-color: white;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.auth-container h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form label {
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #555;
+}
+
+.auth-form input {
+  padding: 10px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.auth-form button {
+  padding: 12px;
+  background-color: orangered;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-form button:hover {
+  background-color: #d93900;
+}
+
+.switch-link {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.switch-link a {
+  color: orangered;
+  text-decoration: none;
+}
+
+.switch-link a:hover {
+  text-decoration: underline;
+}

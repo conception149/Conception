@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Langagae</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/page.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+  <header>
+  <!-- Logo -->
+  <img src="image/actu1.png" alt="Logo devplus" class="logo" />
+
+  <!-- Menu principal -->
+  <nav aria-label="Menu principal">
+    <ul>
+      <li><a href="page_accueil.html">Accueil</a></li>
+      <li><a href="langage.html">Langages</a></li>
+      <li><a href="learder.html">Learder</a></li>
+
+      <!-- Menu déroulant -->
+      <li class="dropdown">
+        <a href="technologie.html" class="dropbtn">Technologies ▼</a>
+        <ul class="dropdown-content">
+          <li><a href="web.html">Web</a></li>
+          <li><a href="ia.html">IA</a></li>
+          <li><a href="systeme_embarque.html">Système embarqué</a></li>
+          <li><a href="mobile.html">Mobile</a></li>
+          <li><a href="desktop.html">Desktop</a></li>
+        </ul>
+      </li>
+
+      <li><a href="communaute.html">Communauté</a></li>
+      <li><a href="actualite.html">Actualité</a></li>
+      <li><a href="a_propos.html">A Propos</a></li>
+    </ul>
+  </nav>
+
+  <!-- Boutons Connexion / Inscription -->
+  <div class="auth_user">
+    <a href="se_connecter.html"><button class="bn1">Se connecter</button></a>
+    <a href="s_inscrire.html"><button class="bn2">S'inscrire</button></a>
+  </div>
+</header>
+
+  <!-- Script pour activer dynamiquement-->
+  <script>
+          const links = document.querySelectorAll("nav ul li a");
+          const currentPage = window.location.pathname.split("/").pop();
+
+          links.forEach(link => {
+          const href = link.getAttribute("href");
+          if (href === currentPage) {
+          link.classList.add("active");
+            }
+           });
+  </script>
+    
+  <main>
+        <!-- Bienvenue -->
+<section class="Bienvenue_langage_css">
+  <div class="Bienvenue-langage-css">
+  <h2 class="animate-zoom">Bienvenue dans l’univers des langages de programmation</h2>
+  <p class="animate-zoom">Découvrez les langages qui façonnent l’univers du numérique moderne.</p>
+</section>
+
+<section class="LangageCSS">
+  <div class="ok">
+    <h2>Langages Émergents et Tendances Actuelles</h2>
+    <p>De Rust à Swift, de Kotlin à Julia, explorez les langages en pleine évolution qui façonnent les pratiques modernes du développement web, mobile, IA et bien plus encore.</p>
+
+  </div>
+            <!-- Intelligence Artificielle -->
+    <div class="elem-langage">
+          <div class="langage-1">
+                <img src="image/python_image.jpg" alt="Python">
+                <h4 class="language-name">Python</h4>
+                <h3 class="Createur">Guido van Rossum</h3>
+                <p>Utilisé en développement web, automatisation, IA, data science. Facile à apprendre, communauté active.</p>
+                <h4 class="right">1991</h4>
+                <a href="python.html" class="btn">En savoir plus</a>
+          </div>
+          <!-- Progressive Web Apps -->
+          <div class="langage-1">
+                <img src="image/java_image.jpg" alt="Java">
+                  <h4 class="language-name">Java</h4>
+                  <h3 class="Createur">James Gosling</h3>
+                  <p>Langage orienté objet pour applications web, mobiles et embarquées. Polyvalent grâce à la JVM.</p>
+                  <h4 class="right">1995</h4>
+                  <a href="java.html" class="btn">En savoir plus</a>
+          </div>
+            <!-- Arduino -->
+          <div class="langage-1">
+               <img src="image/java_script_image.jpg" alt="JavaScript">
+                  <h4 class="language-name">JavaScript</h4>
+                  <h3 class="Createur">Brendan Eich</h3>
+                  <p>Indispensable pour le web interactif. Fonctionne sur tous les navigateurs modernes.</p>
+                   <h4 class="right">1995</h4>
+                  <a href="JavaScript.html" class="btn">En savoir plus</a>
+          </div>
+          <!-- PHP -->
+          <div class="langage-1">
+               <img src="image/image_php.svg" alt="JavaScript">
+                  <h4 class="language-name">PHP</h4>
+                  <h3 class="Createur">Rasmus Lerdorf</h3>
+                  <p>Langage côté serveur pour générer des pages web dynamiques. Populaire avec WordPress, Laravel, etc.</p>
+                  <h4 class="right">1994</h4>
+                  <a href="php.html" class="btn">En savoir plus</a>
+          </div>
+           <!-- Swift -->
+          <div class="langage-1">
+                <img src="image/image_swift.png" alt="JavaScript">
+                  <h4 class="language-name">Swift</h4>
+                  <h3 class="Createur">Chris Lattner</h3>
+                  <p>Langage moderne et rapide d’Apple. Conçu pour remplacer Objective-C et rendre le développement iOS plus simple.</p>
+                  <h4 class="right">2014</h4>
+                  <a href="swiftt.html" class="btn">En savoir plus</a>
+          </div>
+          <!--Rust -->
+          <div class="langage-1">
+                <img src="image/image_rust.jpg" alt="JavaScript">
+                  <h4 class="language-name">Rust</h4>
+                  <h3 class="Createur">Graydon Hoare</h3>
+                  <p>Langage moderne et rapide d’Apple. Conçu pour remplacer Objective-C et rendre le développement iOS plus simple.</p>
+                  <h4 class="right">2010</h4>
+                  <a href="rust.html" class="btn">En savoir plus</a>
+          </div>
+          <!--  C -->
+          <div class="langage-1">
+                <img src="image/image_c.png" alt="JavaScript">
+                  <h4 class="language-name">C</h4>
+                  <h3 class="Createur"> Dennis Ritchie</h3>
+                  <p> Langage bas niveau et performant, souvent utilisé pour développer des systèmes d’exploitation et firmware.</p>
+                  <h4 class="right">1972</h4>
+                  <a href="c.html" class="btn">En savoir plus</a>
+          </div>
+          <!--C++-->
+          <div class="langage-1">
+                <img src="image/c_plus_image.jpg" alt="C++">
+                  <h4 class="language-name">C++</h4>
+                  <h3 class="Createur">Bjarne Stroustrup</h3>
+                  <p>Langage rapide et puissant. Idéal pour les systèmes, les jeux et les logiciels embarqués.</p>
+                  <h4 class="right">1985</h4>
+                  <a href="cpp.html" class="btn">En savoir plus</a>
+          </div>
+    </div>
+  </section>
+   <!--  text-motivante -->
+  <section class="text">
+    <div class="text-1">
+                  <h1 class="p1">Le Monde de la Programmation en Chiffres</h1>
+                  <p class="p2">La programmation est un domaine en constante évolution qui touche aujourd’hui tous les secteurs. Chaque année, des millions de développeurs à travers le monde créent des millions de lignes de code pour construire des applications, des sites web, des systèmes embarqués et bien plus encore.</p>
+            <div class="text-2">
+              <div>
+                  <h1>700M+</h1>   
+                  <p> Langages de Programmation</p>
+              </div>
+              <div>
+                  <h1>30M+</h1>   
+                  <p>Développeurs dans le Monde</p>
+              </div>
+              <div>
+                  <h1>2.5M+</h1>   
+                  <p>Projets open source actifs</p>
+              </div>
+            </div>
+    </div>
+  </section>
+
+        <!--  text-rejoin-nous-->
+  <section class="text2">
+    <div class="text-1">
+                  <h1 class="p1">Prêt à plonger dans l'univers du code?</h1>
+                  <p class="p2"> Rejoignez notre communauté de passionnés de programmation et découvrez comment les langages et technologies façonnent notre avenir numérique</p>
+        <div class="text-2">
+            <div class="text-2-1">
+                  <a href="communaute.html"> Rejoindre la communauté</a>
+                  <a href="a_propos.html">Savoir plus</a>
+            </div>
+        </div>
+    </div>
+    </section>
+   <!--  Pied de page-->
+  <footer>
+    <section class="footer-1">
+        <!-- Logo et description -->
+        <div class="footer-box about">
+                  <img src="image/actu1.png" alt="Logo FOBA" class="footer-logo">
+                  <h1>FOBA</h1>
+                  <p>
+                      Découvrez l'univers passionnant des langages de programmation, leurs créateurs
+                      et les technologies qui façonnent notre monde numérique.
+                  </p>
+            <div class="footer-socials">
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></a>
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn"></a>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+            <div class="footer-box">
+                <h2>Navigation</h2>
+                <ul>
+                    <li><a href="page_accueil.html">Accueil</a></li>
+                    <li><a href="langages.html">Langages</a></li>
+                    <li><a href="leader.html">Leaders</a></li>
+                    <li><a href="technologie.html">Technologies</a></li>
+                </ul>
+            </div>
+
+        <!-- Ressources -->
+            <div class="footer-box">
+                <h2>Ressources</h2>
+                <ul>
+                    <li><a href="communaute.html">Communauté</a></li>
+                    <li><a href="actualite.html">Actualité</a></li>
+                    <li><a href="a_propos.html">À propos</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+
+        <!-- Newsletter -->
+            <div class="footer-box newsletter">
+                <h2>Newsletter</h2>
+                <p>Recevez les dernières actualités sur les langages de programmation.</p>
+                <form>
+                    <input type="email" placeholder="Votre email" required>
+                    <button type="submit">OK</button>
+                </form>
+            </div>
+    </section>
+
+            <div class="footer-tdr">
+                <p>© 2025 Foba. Tous droits réservés.</p>
+            </div>
+</footer>
+</body>
+</html>
