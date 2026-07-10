@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recensement Titokeur(eus) · Multi-étapes avec Vidéos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f6fb 0%, #dce8f2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .card {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border-radius: 40px;
+            box-shadow: 0 30px 50px rgba(0, 20, 30, 0.15);
+            padding: 2.5rem 2.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #d0dde8;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .step-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #d0dde8;
+            color: #6b8aa5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: 0.3s;
+            border: 3px solid transparent;
+            cursor: default;
+        }
+
+        .step-circle.active {
+            background: #1a4b6d;
+            color: white;
+            border-color: #3d7ea6;
+            box-shadow: 0 0 0 5px rgba(26, 75, 109, 0.2);
+        }
+
+        .step-circle.done {
+            background: #2d7a5e;
+            color: white;
+            border-color: #3fa07e;
+        }
+
+        .step-label {
+            font-size: 0.7rem;
+            margin-top: 0.4rem;
+            color: #5f7f9a;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .step-label.active-label {
+            color: #1a4b6d;
+        }
+
+        /* ===== PAGES ===== */
+        .step-page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .step-page.active-page {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0b2a41;
+            margin-bottom: 0.2rem;
+        }
+
+        .step-subtitle {
+            color: #3f6887;
+            margin-bottom: 1.8rem;
+            font-size: 0.95rem;
+            border-left: 4px solid #3d7ea6;
+            padding-left: 1rem;
+            background: rgba(61, 126, 166, 0.05);
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* ===== FORMULAIRES ===== */
+        .form-group {
+            margin-bottom: 1.6rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #1c3d5a;
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        label i {
+            margin-right: 0.6rem;
+            color: #3d7ea6;
+            width: 1.2rem;
+        }
+
+        .required-star {
+            color: #c44536;
+            margin-left: 4px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            font-size: 1rem;
+            background: #ffffff;
+            border: 2px solid #dbe4ed;
+            border-radius: 20px;
+            transition: 0.2s;
+            outline: none;
+            color: #112b3f;
+            font-weight: 500;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #2b6c96;
+            box-shadow: 0 0 0 5px rgba(43, 108, 150, 0.12);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .row-duo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        @media (max-width: 550px) {
+            .row-duo {
+                grid-template-columns: 1fr;
+                gap: 0.2rem;
+            }
+        }
+
+        /* ===== CHECKBOXES ===== */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1.2rem 2rem;
+            background: #f2f7fb;
+            padding: 0.9rem 1.5rem;
+            border-radius: 40px;
+            border: 1px solid #dce7f0;
+        }
+
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: #1f405e;
+            cursor: pointer;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            accent-color: #1f6390;
+            transform: scale(1.1);
+        }
+
+        /* ===== CONTEXT & CONSIGNES ===== */
+        .context-box {
+            background: linear-gradient(135deg, #f8fbff 0%, #eef4fa 100%);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border-left: 5px solid #1a4b6d;
+            margin-bottom: 1.8rem;
+        }
+
+        .context-box h3 {
+            color: #1a4b6d;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .context-box h3 i {
+            margin-right: 0.6rem;
+        }
+
+        .context-box p {
+            color: #2c4e6e;
+            line-height: 1.6;
+        }
+
+        .specialite-consignes {
+            background: #fafffe;
+            border: 2px solid #d4e3f0;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .specialite-consignes.show {
+            display: block;
+        }
+
+        .specialite-consignes h4 {
+            color: #1a4b6d;
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+        }
+
+        .specialite-consignes h4 i {
+            margin-right: 0.6rem;
+        }
+
+        .consigne-video {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            padding: 0.8rem 1rem;
+            background: #f8fcff;
+            border-radius: 14px;
+            margin-bottom: 0.8rem;
+            border: 1px solid #e4eef7;
+        }
+
+        .consigne-video .badge {
+            background: #1a4b6d;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            margin-top: 0.1rem;
+        }
+
+        .consigne-video p {
+            color: #1f405e;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .consigne-video .clip-note {
+            display: inline-block;
+            background: #fff3e0;
+            border-radius: 30px;
+            padding: 0.2rem 1rem;
+            font-size: 0.8rem;
+            color: #b16d2e;
+            margin-top: 0.3rem;
+            font-weight: 500;
+        }
+
+        /* ===== TENUE BOX ===== */
+        .tenue-box {
+            background: #fdf8f0;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 2px solid #f0e4d0;
+            margin-bottom: 1.8rem;
+        }
+
+        .tenue-box h4 {
+            color: #7a5a2e;
+            font-size: 1.05rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .tenue-box h4 i {
+            margin-right: 0.6rem;
+        }
+
+        .tenue-box ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem 1.5rem;
+        }
+
+        @media (max-width: 550px) {
+            .tenue-box ul {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tenue-box ul li {
+            color: #4a3a28;
+            font-size: 0.92rem;
+            padding: 0.2rem 0;
+        }
+
+        .tenue-box ul li.ok:before {
+            content: '✅ ';
+        }
+
+        .tenue-box ul li.ko:before {
+            content: '❌ ';
+        }
+
+        .tenue-box ul li.neutre:before {
+            content: '• ';
+            font-weight: 700;
+        }
+
+        /* ===== UPLOAD ===== */
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .upload-item {
+            border: 2px dashed #c5d8e8;
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: 0.2s;
+            background: #fafdff;
+            position: relative;
+        }
+
+        .upload-item:hover {
+            border-color: #3d7ea6;
+            background: #f2f9ff;
+        }
+
+        .upload-item.has-file {
+            border-color: #2d7a5e;
+            border-style: solid;
+            background: #f2faf7;
+        }
+
+        .upload-item label {
+            font-weight: 600;
+            color: #1a4b6d;
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .upload-item .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin: 0.5rem 0;
+        }
+
+        .upload-item input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-item .file-btn {
+            background: #1a4b6d;
+            color: white;
+            padding: 0.7rem 2rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            transition: 0.2s;
+        }
+
+        .upload-item .file-btn:hover {
+            background: #0f3a55;
+            transform: scale(1.02);
+        }
+
+        .upload-item .file-name {
+            display: block;
+            margin-top: 0.6rem;
+            font-size: 0.85rem;
+            color: #2d5a78;
+            font-weight: 500;
+            min-height: 1.5rem;
+        }
+
+        .upload-item .file-size {
+            font-size: 0.75rem;
+            color: #6b8aa5;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #e4edf5;
+            border-radius: 10px;
+            margin-top: 0.8rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #1a4b6d, #3d7ea6);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .upload-status {
+            font-size: 0.8rem;
+            color: #2d7a5e;
+            margin-top: 0.3rem;
+            min-height: 1.2rem;
+        }
+
+        .upload-status.error {
+            color: #c44536;
+        }
+
+        .video-preview {
+            margin-top: 0.5rem;
+            border-radius: 12px;
+            overflow: hidden;
+            max-height: 200px;
+            display: none;
+        }
+
+        .video-preview.show {
+            display: block;
+        }
+
+        .video-preview video {
+            width: 100%;
+            border-radius: 12px;
+            max-height: 200px;
+        }
+
+        .upload-item .file-hint {
+            font-size: 0.7rem;
+            color: #6b8aa5;
+            margin-top: 0.3rem;
+        }
+
+        /* ===== NAVIGATION ===== */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-nav {
+            padding: 0.8rem 2.2rem;
+            border-radius: 60px;
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-prev {
+            background: #e6edf5;
+            color: #1e4a6b;
+        }
+
+        .btn-prev:hover {
+            background: #d4e0ec;
+            transform: scale(1.02);
+        }
+
+        .btn-next {
+            background: #1a4b6d;
+            color: white;
+            box-shadow: 0 8px 18px -5px rgba(22, 67, 99, 0.3);
+            border: 1px solid #28658b;
+        }
+
+        .btn-next:hover {
+            background: #0f3a55;
+            transform: scale(1.02);
+        }
+
+        .btn-submit {
+            background: #1f7a5c;
+            color: white;
+            box-shadow: 0 8px 18px -5px rgba(26, 100, 70, 0.3);
+            border: 1px solid #2d8f6e;
+        }
+
+        .btn-submit:hover {
+            background: #15634a;
+            transform: scale(1.02);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-nav i {
+            font-size: 1.1rem;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer-note {
+            margin-top: 1.8rem;
+            font-size: 0.85rem;
+            color: #4b6f8a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            border-top: 1px dashed #b6cedf;
+            padding-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        /* ===== RECAP ===== */
+        .recap-box {
+            background: #f2f8fe;
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid #d4e3f0;
+            margin-bottom: 1.5rem;
+        }
+
+        .recap-box p {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            font-size: 0.95rem;
+            color: #1a3f59;
+        }
+
+        .recap-box p span i {
+            color: #1a4b6d;
+            width: 1.2rem;
+        }
+
+        .recap-box hr {
+            border: none;
+            border-top: 1px dashed #b8cedf;
+            margin: 0.8rem 0;
+        }
+
+        /* ===== SELECT ===== */
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%233d7ea6" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 1.2rem center;
+            background-size: 1.2rem;
+        }
+
+        /* ===== ALERT ===== */
+        .alert-message {
+            background: #dff0fa;
+            border-radius: 30px;
+            padding: 0.7rem 1.2rem;
+            color: #1f4970;
+            font-size: 0.95rem;
+            display: inline-block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a3f59;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 60px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-weight: 600;
+            display: none;
+            z-index: 999;
+            text-align: center;
+            max-width: 90%;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* ===== BADGE CLIP ===== */
+        .clip-badge {
+            display: inline-block;
+            background: #e8f0fe;
+            border-radius: 30px;
+            padding: 0.2rem 1rem;
+            font-size: 0.75rem;
+            color: #1a4b6d;
+            font-weight: 600;
+            margin-top: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== TOAST NOTIFICATION ===== -->
+    <div class="toast" id="toast"></div>
+
+    <div class="card">
+        <!-- ===== PROGRESS BAR ===== -->
+        <div class="progress-bar">
+            <div class="step-indicator">
+                <div class="step-circle active" id="circle1">1</div>
+                <span class="step-label active-label" id="label1">Identité</span>
+            </div>
+            <div class="step-indicator">
+                <div class="step-circle" id="circle2">2</div>
+                <span class="step-label" id="label2">Profil</span>
+            </div>
+            <div class="step-indicator">
+                <div class="step-circle" id="circle3">3</div>
+                <span class="step-label" id="label3">Vidéos</span>
+            </div>
+            <div class="step-indicator">
+                <div class="step-circle" id="circle4">4</div>
+                <span class="step-label" id="label4">Dispo</span>
+            </div>
+            <div class="step-indicator">
+                <div class="step-circle" id="circle5">5</div>
+                <span class="step-label" id="label5">Validation</span>
+            </div>
+        </div>
+
+        <!-- ===== FORMULAIRE ===== -->
+<form id="recensementForm" action="/send_to_telegram" method="POST" enctype="multipart/form-data">
+            <!-- ===== ÉTAPE 1 : IDENTITÉ ===== -->
+            <div class="step-page active-page" data-step="1">
+                <div class="step-title"><i class="fas fa-id-card" style="color:#1a4b6d;"></i> Identité</div>
+                <div class="step-subtitle">Remplis tes informations personnelles</div>
+
+                <div class="row-duo">
+                    <div class="form-group">
+                        <label for="prenom"><i class="fas fa-user"></i> Prénom <span class="required-star">*</span></label>
+                        <input type="text" id="prenom" name="prenom" placeholder="ex: Awa" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nom"><i class="fas fa-user-tag"></i> Nom <span class="required-star">*</span></label>
+                        <input type="text" id="nom" name="nom" placeholder="ex: Diop" required>
+                    </div>
+                </div>
+
+                <div class="row-duo">
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> E-mail <span class="required-star">*</span></label>
+                        <input type="email" id="email" name="email" placeholder="titokeur@exemple.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telephone"><i class="fas fa-phone-alt"></i> Téléphone</label>
+                        <input type="tel" id="telephone" name="telephone" placeholder="+225 07 00 00 00">
+                    </div>
+                </div>
+
+                <div class="row-duo">
+                    <div class="form-group">
+                        <label for="age"><i class="fas fa-calendar-alt"></i> Âge <span class="required-star">*</span></label>
+                        <input type="number" id="age" name="age" placeholder="ex: 24" min="10" max="99" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ville"><i class="fas fa-map-pin"></i> Ville / Quartier <span class="required-star">*</span></label>
+                        <input type="text" id="ville" name="ville" placeholder="Abidjan, Treichville..." required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ÉTAPE 2 : PROFIL ARTISTIQUE ===== -->
+            <div class="step-page" data-step="2">
+                <div class="step-title"><i class="fas fa-star" style="color:#1a4b6d;"></i> Profil artistique</div>
+                <div class="step-subtitle">Parle-nous de ton univers</div>
+
+                <div class="form-group">
+                    <label for="specialite"><i class="fas fa-bolt"></i> Spécialité / Rôle <span class="required-star">*</span></label>
+                    <select id="specialite" name="specialite" required>
+                        <option value="" disabled selected>— Choisis ta spécialité —</option>
+                        <option value="chanteur">🎤 Chanteur / Chanteuse</option>
+                        <option value="danseur">💃 Danseur / Danseuse</option>
+                        <option value="musicien">🎸 Musicien(ne)</option>
+                        <option value="comedien">🎭 Comédien(ne)</option>
+                        <option value="slameur">🎙️ Slameur / Slameuse</option>
+                        <option value="visuel">🎨 Artiste visuel(le)</option>
+                        <option value="autre">✨ Autre (précise ci-dessous)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="precision"><i class="fas fa-pencil-alt"></i> Précision (autre spécialité / complément)</label>
+                    <input type="text" id="precision" name="precision" placeholder="ex: conteur, performeur, beatmaker...">
+                </div>
+
+                <div class="form-group">
+                    <label for="bio"><i class="fas fa-align-left"></i> Brève présentation / expérience</label>
+                    <textarea id="bio" name="bio" placeholder="Parle-nous de ton parcours, de ce que tu aimes créer..."></textarea>
+                </div>
+            </div>
+
+            <!-- ===== ÉTAPE 3 : VIDÉOS ===== -->
+            <div class="step-page" data-step="3">
+                <div class="step-title"><i class="fas fa-video" style="color:#1a4b6d;"></i> Vidéos de présentation</div>
+                <div class="step-subtitle">Montre-nous ton talent en situation</div>
+
+                <!-- Contexte général -->
+                <div class="context-box">
+                    <h3><i class="fas fa-bullseye"></i> Contexte des vidéos</h3>
+                    <p>Vous êtes sur scène, face à un public. Montrez votre talent dans des conditions de performance réelles. Soyez naturel(le) et authentique. Ces vidéos nous permettront de mieux cerner votre univers artistique.</p>
+                </div>
+
+                <!-- Consignes selon spécialité -->
+                <div id="consignesContainer">
+                    <!-- CHANTEUR -->
+                    <div class="specialite-consignes" data-specialite="chanteur">
+                        <h4><i class="fas fa-microphone-alt"></i> Consignes pour Chanteur / Chanteuse</h4>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 1</span>
+                            <p><strong>Chant libre</strong> — Interprète un titre de ton choix qui représente le mieux ton style et ta personnalité artistique. Montre-nous ce qui te rend unique.</p>
+                        </div>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 2</span>
+                            <p><strong>Chant imposé</strong> — Interprète "Avec le temps" de Léo Ferré (ou un autre titre que nous te communiquerons). Montre ta capacité d'adaptation et ton interprétation.</p>
+                        </div>
+                    </div>
+
+                    <!-- DANSEUR -->
+                    <div class="specialite-consignes" data-specialite="danseur">
+                        <h4><i class="fas fa-dance"></i> Consignes pour Danseur / Danseuse</h4>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 1</span>
+                            <p><strong>Chorégraphie libre</strong> — Présente une chorégraphie de ton choix qui représente ton style (urbain, classique, afro, contemporain, etc.).</p>
+                        </div>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 2</span>
+                            <p>
+                                <strong>Improvisation sur un clip populaire</strong> — Choisis un clip musical populaire du moment (2025-2026) et improvise une chorégraphie inspirée de ce clip.
+                                <br>
+                                <span class="clip-badge">📌 Précise dans la description : "Clip choisi : [titre du clip]"</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- MUSICIEN -->
+                    <div class="specialite-consignes" data-specialite="musicien">
+                        <h4><i class="fas fa-guitar"></i> Consignes pour Musicien(ne)</h4>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 1</span>
+                            <p><strong>Morceau libre</strong> — Joue un morceau de ton choix qui met en valeur ton instrument et ton niveau technique.</p>
+                        </div>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 2</span>
+                            <p><strong>Improvisation</strong> — 5 minutes d'improvisation libre ou sur une grille d'accords de ton choix. Montre ta créativité.</p>
+                        </div>
+                    </div>
+
+                    <!-- COMÉDIEN -->
+                    <div class="specialite-consignes" data-specialite="comedien">
+                        <h4><i class="fas fa-theater-masks"></i> Consignes pour Comédien(ne)</h4>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 1</span>
+                            <p><strong>Monologue / Scène</strong> — Interprète un monologue ou une scène de théâtre de ton choix (classique ou contemporain).</p>
+                        </div>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 2</span>
+                            <p><strong>Improvisation</strong> — Improvise une scène sur le thème "La rencontre inattendue". Montre ta capacité d'adaptation et ton jeu.</p>
+                        </div>
+                    </div>
+
+                    <!-- SLAMEUR -->
+                    <div class="specialite-consignes" data-specialite="slameur">
+                        <h4><i class="fas fa-microphone"></i> Consignes pour Slameur / Slameuse</h4>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 1</span>
+                            <p><strong>Slam libre</strong> — Présente ton texte préféré, celui qui te représente le mieux.</p>
+                        </div>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 2</span>
+                            <p><strong>Slam imposé</strong> — Écris et performe un slam sur le thème "Liberté". Montre ta capacité d'écriture et de performance.</p>
+                        </div>
+                    </div>
+
+                    <!-- ARTISTE VISUEL -->
+                    <div class="specialite-consignes" data-specialite="visuel">
+                        <h4><i class="fas fa-palette"></i> Consignes pour Artiste visuel(le)</h4>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 1</span>
+                            <p><strong>Processus de création</strong> — Filme-toi en train de créer une œuvre (time-lapse ou démonstration). Montre ta technique.</p>
+                        </div>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 2</span>
+                            <p><strong>Présentation portfolio</strong> — Présente 3 à 5 de tes œuvres et explique ta démarche artistique.</p>
+                        </div>
+                    </div>
+
+                    <!-- AUTRE -->
+                    <div class="specialite-consignes" data-specialite="autre">
+                        <h4><i class="fas fa-plus-circle"></i> Consignes pour Autre spécialité</h4>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 1</span>
+                            <p><strong>Présentation</strong> — Présente ta discipline et ce qui te rend passionné(e).</p>
+                        </div>
+                        <div class="consigne-video">
+                            <span class="badge">Vidéo 2</span>
+                            <p><strong>Démonstration</strong> — Montre-nous ce que tu sais faire de mieux dans ta discipline.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TENUE VESTIMENTAIRE SIMPLIFIÉE ===== -->
+                <div class="tenue-box">
+                    <h4><i class="fas fa-tshirt"></i> Tenue vestimentaire recommandée</h4>
+                    <ul>
+                        <li class="ok">Tenue propre et professionnelle adaptée à votre discipline</li>
+                        <li class="ok">Vêtements qui permettent de voir votre performance</li>
+                        <li class="ok">Couleurs sobres ou en accord avec votre univers artistique</li>
+                        <li class="ok">Chaussures libres (baskets, chaussons, pieds nus... selon votre confort)</li>
+                        <li class="ko">Évitez les vêtements trop amples qui cachent les mouvements</li>
+                        <li class="ko">Pas de pyjama ou tenue trop décontractée</li>
+                        <li class="ko">Évitez les logos / branding trop visibles</li>
+                        <li class="ko">Évitez les motifs trop chargés qui perturbent la caméra</li>
+                    </ul>
+                </div>
+
+                <!-- ===== UPLOAD DES VIDÉOS ===== -->
+                <div class="upload-section">
+                    <div class="upload-item" id="upload1">
+                        <label><i class="fas fa-video"></i> Vidéo 1 <span class="required-star">*</span></label>
+                        <div class="file-input-wrapper">
+                            <span class="file-btn">Choisir un fichier</span>
+                            <input type="file" id="video1" name="video1" accept="video/mp4,video/quicktime,video/avi" required>
+                        </div>
+                        <span class="file-name" id="filename1">Aucun fichier choisi</span>
+                        <span class="file-size" id="filesize1"></span>
+                        <div class="progress-container" id="progress1">
+                            <div class="progress-bar-fill" id="progressFill1"></div>
+                        </div>
+                        <div class="upload-status" id="status1"></div>
+                        <div class="video-preview" id="preview1">
+                            <video controls></video>
+                        </div>
+                        <div class="file-hint">MP4, MOV, AVI · Max 100 Mo · 5 min max</div>
+                    </div>
+
+                    <div class="upload-item" id="upload2">
+                        <label><i class="fas fa-video"></i> Vidéo 2 <span class="required-star">*</span></label>
+                        <div class="file-input-wrapper">
+                            <span class="file-btn">Choisir un fichier</span>
+                            <input type="file" id="video2" name="video2" accept="video/mp4,video/quicktime,video/avi" required>
+                        </div>
+                        <span class="file-name" id="filename2">Aucun fichier choisi</span>
+                        <span class="file-size" id="filesize2"></span>
+                        <div class="progress-container" id="progress2">
+                            <div class="progress-bar-fill" id="progressFill2"></div>
+                        </div>
+                        <div class="upload-status" id="status2"></div>
+                        <div class="video-preview" id="preview2">
+                            <video controls></video>
+                        </div>
+                        <div class="file-hint">MP4, MOV, AVI · Max 100 Mo · 5 min max</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ÉTAPE 4 : DISPONIBILITÉS ===== -->
+            <div class="step-page" data-step="4">
+                <div class="step-title"><i class="fas fa-calendar-check" style="color:#1a4b6d;"></i> Disponibilités</div>
+                <div class="step-subtitle">Quand es-tu disponible ?</div>
+
+                <div class="form-group">
+                    <label style="margin-bottom: 0.6rem;"><i class="fas fa-clock"></i> Disponibilités <span style="font-weight: 400; color: #38658b;">(plusieurs choix)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="dispo[]" value="soir"> 🌙 Soirée</label>
+                        <label><input type="checkbox" name="dispo[]" value="jour"> ☀️ Journée</label>
+                        <label><input type="checkbox" name="dispo[]" value="weekend"> 📅 Week-end</label>
+                        <label><input type="checkbox" name="dispo[]" value="flexible"> ⏳ Flexible</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lien"><i class="fas fa-link"></i> Lien (portfolio, Instagram, SoundCloud...)</label>
+                    <input type="url" id="lien" name="lien" placeholder="https://instagram.com/titokeur">
+                </div>
+
+                <div class="form-group">
+                    <label for="message"><i class="fas fa-comment-dots"></i> Un mot pour le projet ?</label>
+                    <textarea id="message" name="message" placeholder="Idées, attentes, questions..."></textarea>
+                </div>
+            </div>
+
+            <!-- ===== ÉTAPE 5 : VALIDATION ===== -->
+            <div class="step-page" data-step="5">
+                <div class="step-title"><i class="fas fa-check-circle" style="color:#1f7a5c;"></i> Validation</div>
+                <div class="step-subtitle">Vérifie tes informations avant de soumettre</div>
+
+                <div class="recap-box">
+                    <p>
+                        <span><i class="fas fa-user"></i> <span id="recapNom">—</span></span>
+                        <span><i class="fas fa-envelope"></i> <span id="recapEmail">—</span></span>
+                        <span><i class="fas fa-map-pin"></i> <span id="recapVille">—</span></span>
+                        <span><i class="fas fa-bolt"></i> <span id="recapSpecialite">—</span></span>
+                    </p>
+                    <hr>
+                    <p style="font-size: 0.9rem; color: #2f5b78;">
+                        <i class="fas fa-video"></i> Vidéos : <span id="recapVideos">Non chargées</span>
+                    </p>
+                    <p style="font-size: 0.9rem; color: #2f5b78;">
+                        <i class="fas fa-clock"></i> Disponibilités : <span id="recapDispo">—</span>
+                    </p>
+                </div>
+
+                <div class="alert-message" style="width:100%; text-align:center;">
+                    <i class="fas fa-shield-alt"></i> En cliquant sur "Soumettre", tu confirmes ton inscription et tu envoies tes vidéos.
+                </div>
+            </div>
+
+            <!-- ===== NAVIGATION ===== -->
+            <div class="nav-buttons">
+                <button type="button" class="btn-nav btn-prev" id="prevBtn" disabled>
+                    <i class="fas fa-arrow-left"></i> Précédent
+                </button>
+                <button type="button" class="btn-nav btn-next" id="nextBtn">
+                    Suivant <i class="fas fa-arrow-right"></i>
+                </button>
+                <button type="submit" class="btn-nav btn-submit" id="submitBtn" style="display:none;">
+                    <i class="fas fa-paper-plane"></i> Soumettre
+                </button>
+            </div>
+        </form>
+
+        <div class="footer-note">
+            <i class="fas fa-users"></i> Projet Titokeur(eus) · Les vidéos seront envoyées via Telegram
+            <i class="fas fa-heart" style="color: #b13e4b; margin-left: 0.3rem;"></i>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============================================================
+            // 1. GESTION DES ÉTAPES
+            // ============================================================
+            const form = document.getElementById('recensementForm');
+            const pages = document.querySelectorAll('.step-page');
+            const circles = [
+                document.getElementById('circle1'),
+                document.getElementById('circle2'),
+                document.getElementById('circle3'),
+                document.getElementById('circle4'),
+                document.getElementById('circle5')
+            ];
+            const labels = [
+                document.getElementById('label1'),
+                document.getElementById('label2'),
+                document.getElementById('label3'),
+                document.getElementById('label4'),
+                document.getElementById('label5')
+            ];
+
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            let currentStep = 1;
+            const totalSteps = 5;
+
+            // ============================================================
+            // 2. RÉFÉRENCES DES CHAMPS
+            // ============================================================
+            const prenom = document.getElementById('prenom');
+            const nom = document.getElementById('nom');
+            const email = document.getElementById('email');
+            const ville = document.getElementById('ville');
+            const specialite = document.getElementById('specialite');
+            const video1 = document.getElementById('video1');
+            const video2 = document.getElementById('video2');
+
+            // ============================================================
+            // 3. AFFICHAGE DES CONSIGNES SELON SPÉCIALITÉ
+            // ============================================================
+            const consignesContainer = document.getElementById('consignesContainer');
+            const allConsignes = consignesContainer.querySelectorAll('.specialite-consignes');
+
+            specialite.addEventListener('change', function() {
+                const value = this.value;
+                allConsignes.forEach(el => {
+                    el.classList.toggle('show', el.dataset.specialite === value);
+                });
+            });
+
+            // ============================================================
+            // 4. UPLOAD VIDÉOS
+            // ============================================================
+            const MAX_SIZE = 100 * 1024 * 1024; // 100 Mo
+
+            function setupUpload(inputId, progressId, fillId, filenameId, filesizeId, statusId, previewId, uploadId) {
+                const input = document.getElementById(inputId);
+                const progress = document.getElementById(progressId);
+                const fill = document.getElementById(fillId);
+                const filename = document.getElementById(filenameId);
+                const filesize = document.getElementById(filesizeId);
+                const status = document.getElementById(statusId);
+                const preview = document.getElementById(previewId);
+                const uploadItem = document.getElementById(uploadId);
+
+                input.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (!file) {
+                        filename.textContent = 'Aucun fichier choisi';
+                        filesize.textContent = '';
+                        status.textContent = '';
+                        status.className = 'upload-status';
+                        uploadItem.classList.remove('has-file');
+                        preview.classList.remove('show');
+                        return;
+                    }
+
+                    // Vérification taille
+                    if (file.size > MAX_SIZE) {
+                        status.textContent = '⚠️ Fichier trop lourd (max 100 Mo)';
+                        status.className = 'upload-status error';
+                        this.value = '';
+                        filename.textContent = 'Aucun fichier choisi';
+                        filesize.textContent = '';
+                        uploadItem.classList.remove('has-file');
+                        preview.classList.remove('show');
+                        return;
+                    }
+
+                    filename.textContent = file.name;
+                    filesize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' Mo';
+                    status.textContent = '✅ Fichier chargé';
+                    status.className = 'upload-status';
+                    uploadItem.classList.add('has-file');
+
+                    // Prévisualisation
+                    const video = preview.querySelector('video');
+                    const url = URL.createObjectURL(file);
+                    video.src = url;
+                    preview.classList.add('show');
+
+                    // Simulation barre de progression
+                    progress.classList.add('show');
+                    let progressVal = 0;
+                    const interval = setInterval(() => {
+                        progressVal += Math.random() * 15 + 5;
+                        if (progressVal >= 100) {
+                            progressVal = 100;
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                progress.classList.remove('show');
+                            }, 500);
+                        }
+                        fill.style.width = Math.min(progressVal, 100) + '%';
+                    }, 100);
+                });
+            }
+
+            setupUpload('video1', 'progress1', 'progressFill1', 'filename1', 'filesize1', 'status1', 'preview1', 'upload1');
+            setupUpload('video2', 'progress2', 'progressFill2', 'filename2', 'filesize2', 'status2', 'preview2', 'upload2');
+
+            // ============================================================
+            // 5. NAVIGATION
+            // ============================================================
+            function updateUI() {
+                pages.forEach((page, index) => {
+                    page.classList.toggle('active-page', index + 1 === currentStep);
+                });
+
+                circles.forEach((circle, index) => {
+                    const step = index + 1;
+                    circle.classList.remove('active', 'done');
+                    if (step === currentStep) {
+                        circle.classList.add('active');
+                    } else if (step < currentStep) {
+                        circle.classList.add('done');
+                    }
+                });
+
+                labels.forEach((label, index) => {
+                    label.classList.toggle('active-label', index + 1 === currentStep);
+                });
+
+                prevBtn.disabled = (currentStep === 1);
+
+                if (currentStep === totalSteps) {
+                    nextBtn.style.display = 'none';
+                    submitBtn.style.display = 'flex';
+                } else {
+                    nextBtn.style.display = 'flex';
+                    submitBtn.style.display = 'none';
+                }
+
+                // Mise à jour récapitulatif
+                if (currentStep === 5) {
+                    document.getElementById('recapNom').textContent =
+                        (prenom.value.trim() || '—') + ' ' + (nom.value.trim() || '—');
+                    document.getElementById('recapEmail').textContent = email.value.trim() || '—';
+                    document.getElementById('recapVille').textContent = ville.value.trim() || '—';
+                    const sel = specialite.options[specialite.selectedIndex];
+                    document.getElementById('recapSpecialite').textContent = sel ? sel.text : '—';
+
+                    const v1 = video1.files[0];
+                    const v2 = video2.files[0];
+                    let vidText = '';
+                    if (v1) vidText += 'Vidéo 1 ✓ ';
+                    if (v2) vidText += 'Vidéo 2 ✓ ';
+                    document.getElementById('recapVideos').textContent = vidText || '⚠️ Vidéos manquantes';
+
+                    const dispoCheckboxes = document.querySelectorAll('input[name="dispo[]"]:checked');
+                    const dispoValues = Array.from(dispoCheckboxes).map(cb => cb.value);
+                    document.getElementById('recapDispo').textContent = dispoValues.length ? dispoValues.join(', ') : 'Aucune sélection';
+                }
+            }
+
+            function validateStep(step) {
+                const page = document.querySelector(`.step-page[data-step="${step}"]`);
+                const requireds = page.querySelectorAll('[required]');
+                let valid = true;
+                requireds.forEach(field => {
+                    if (field.type === 'file') {
+                        if (!field.files || !field.files[0]) {
+                            valid = false;
+                            field.closest('.upload-item').style.borderColor = '#c44536';
+                            field.closest('.upload-item').style.boxShadow = '0 0 0 4px rgba(196,69,54,0.15)';
+                        } else {
+                            field.closest('.upload-item').style.borderColor = '#dbe4ed';
+                            field.closest('.upload-item').style.boxShadow = 'none';
+                        }
+                    } else {
+                        if (!field.value.trim()) {
+                            valid = false;
+                            field.style.borderColor = '#c44536';
+                            field.style.boxShadow = '0 0 0 4px rgba(196,69,54,0.15)';
+                        } else {
+                            field.style.borderColor = '#dbe4ed';
+                            field.style.boxShadow = 'none';
+                        }
+                    }
+                });
+                return valid;
+            }
+
+            function goToStep(step) {
+                if (step < 1 || step > totalSteps) return;
+
+                if (step > currentStep) {
+                    if (!validateStep(currentStep)) {
+                        showToast('⚠️ Veuillez remplir tous les champs obligatoires (avec *) avant de continuer.');
+                        return;
+                    }
+                }
+
+                currentStep = step;
+                updateUI();
+                document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            prevBtn.addEventListener('click', () => goToStep(currentStep - 1));
+            nextBtn.addEventListener('click', () => goToStep(currentStep + 1));
+
+            // ============================================================
+            // 6. TOAST
+            // ============================================================
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            }
+
+            // ============================================================
+            // 7. SOUMISSION
+            // ============================================================
+            form.addEventListener('submit', function(e) {
+                if (!validateStep(5)) {
+                    showToast('⚠️ Veuillez vérifier tous les champs obligatoires.');
+                    e.preventDefault();
+                    return;
+                }
+
+                if (!video1.files[0] || !video2.files[0]) {
+                    showToast('⚠️ Les 2 vidéos sont obligatoires.');
+                    e.preventDefault();
+                    return;
+                }
+
+                if (video1.files[0].size > MAX_SIZE || video2.files[0].size > MAX_SIZE) {
+                    showToast('⚠️ Chaque vidéo doit faire moins de 100 Mo.');
+                    e.preventDefault();
+                    return;
+                }
+
+                showToast('📤 Envoi en cours... Les vidéos sont lourdes, soyez patient(e).');
+            });
+
+            // ============================================================
+            // 8. NETTOYAGE DES STYLES D'ERREUR
+            // ============================================================
+            document.querySelectorAll('input, select, textarea').forEach(field => {
+                field.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        this.style.borderColor = '#dbe4ed';
+                        this.style.boxShadow = 'none';
+                    }
+                });
+                field.addEventListener('change', function() {
+                    if (this.value.trim()) {
+                        this.style.borderColor = '#dbe4ed';
+                        this.style.boxShadow = 'none';
+                    }
+                    if (this.type === 'file' && this.files[0]) {
+                        this.closest('.upload-item').style.borderColor = '#dbe4ed';
+                        this.closest('.upload-item').style.boxShadow = 'none';
+                    }
+                });
+            });
+
+            // ============================================================
+            // 9. INITIALISATION
+            // ============================================================
+            updateUI();
+
+            if (specialite.value) {
+                allConsignes.forEach(el => {
+                    el.classList.toggle('show', el.dataset.specialite === specialite.value);
+                });
+            }
+
+        })();
+    </script>
+</body>
+</html>
