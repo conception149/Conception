@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consentement — Avant de continuer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1A1030;
+    --surface: #2C1B4D;
+    --surface-2: #241541;
+    --coral: #FF5C8A;
+    --gold: #FFC93C;
+    --text: #F5F1FA;
+    --muted: #B8A9D9;
+    --ring: rgba(255,92,138,0.45);
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family:'Manrope', sans-serif;
+    line-height:1.6;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding: 2.5rem 1.4rem 4rem;
+  }
+  .display{ font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:0.01em; line-height:0.98; }
+  .mono{ font-family:'Space Mono', monospace; letter-spacing:0.06em; text-transform:uppercase; }
+
+  .card{
+    width:100%;
+    max-width:620px;
+    background: var(--surface);
+    border-radius:28px;
+    padding: clamp(1.6rem, 4vw, 2.8rem);
+  }
+  .eyebrow{ font-size:0.72rem; color: var(--gold); margin-bottom:0.9rem; }
+  h1{ font-size: clamp(1.7rem, 5vw, 2.3rem); margin-bottom:0.9rem; }
+  .lead{ color: var(--muted); font-size:0.98rem; margin-bottom:2rem; max-width:56ch; }
+
+  .block{
+    background: var(--surface-2);
+    border-radius:18px;
+    padding: 1.3rem 1.5rem;
+    margin-bottom:1.1rem;
+  }
+  .block__title{
+    display:flex; align-items:center; gap:0.6rem;
+    font-size:0.95rem; font-weight:800; margin-bottom:0.5rem;
+  }
+  .block__icon{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:1.6rem; height:1.6rem; border-radius:8px;
+    background: rgba(255,92,138,0.15); color: var(--coral);
+    font-size:0.85rem; flex-shrink:0;
+  }
+  .block__text{ font-size:0.9rem; color: var(--muted); }
+  .block__text strong{ color: var(--text); }
+
+  .checks{ margin: 2rem 0 1.6rem; display:flex; flex-direction:column; gap:0.9rem; }
+  .check-row{
+    display:flex; align-items:flex-start; gap:0.8rem;
+    background: var(--surface-2); border-radius:14px; padding:1rem 1.1rem;
+    border:1px solid rgba(184,169,217,0.2);
+  }
+  .check-row input{
+    margin-top:0.2rem; width:1.15rem; height:1.15rem; flex-shrink:0; accent-color: var(--coral);
+    cursor:pointer;
+  }
+  .check-row label{ font-size:0.88rem; color: var(--text); cursor:pointer; }
+  .check-row label strong{ color: var(--gold); }
+
+  .actions{ display:flex; gap:0.9rem; flex-wrap:wrap; margin-top:1.8rem; }
+  .btn{
+    flex:1; min-width:160px;
+    display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;
+    font-weight:800; font-size:0.95rem; padding:0.95rem 1.6rem; border-radius:999px;
+    border:none; cursor:pointer; transition: transform .15s ease, opacity .15s ease;
+  }
+  .btn:focus-visible{ outline: 3px solid var(--ring); outline-offset: 3px; }
+  .btn--accept{ background: var(--coral); color:#1A1030; }
+  .btn--accept:hover:not(:disabled){ transform: translateY(-2px); }
+  .btn--accept:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn--decline{ background:transparent; border:1px solid var(--muted); color: var(--text); }
+  .btn--decline:hover{ border-color: var(--coral); color: var(--coral); }
+
+  .footnote{ margin-top:1.4rem; font-size:0.78rem; color: var(--muted); }
+
+  .state{ display:none; text-align:center; padding-top:1rem; }
+  .state.visible{ display:block; }
+  .state h2{ font-size:1.4rem; margin-bottom:0.7rem; }
+  .state p{ color: var(--muted); font-size:0.95rem; }
+</style>
+</head>
+<body>
+
+<div class="card" id="consent-card">
+  <p class="eyebrow mono">Avant de continuer</p>
+  <h1 class="display">Ce que tes vidéos vont devenir</h1>
+  <p class="lead">Avant d'envoyer quoi que ce soit, on veut que tu saches exactement à quoi vont servir tes vidéos. Lis ce qui suit, puis dis-nous si tu es d'accord.</p>
+
+  <div class="block">
+    <div class="block__title"><span class="block__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><circle cx="12" cy="12" r="0.5" fill="currentColor"></circle></svg></span> <span>À quoi servent tes vidéos</span></div>
+    <div class="block__text">Tes vidéos ne sont pas simplement republiées. Elles servent à <strong>entraîner un modèle d'intelligence artificielle</strong> qui apprend à reproduire des mouvements de danse. Ce modèle pourra ensuite <strong>générer de nouvelles vidéos de danse créées par IA</strong>, en s'inspirant de la façon dont un corps bouge dans tes vidéos.</div>
+  </div>
+
+  <div class="block">
+    <div class="block__title"><span class="block__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span> <span>Usage commercial possible</span></div>
+    <div class="block__text">Les vidéos générées par ce modèle pourront être <strong>utilisées commercialement</strong> (contenu, produits, projets liés). Une fois le modèle entraîné, il peut produire un grand nombre de vidéos, au-delà des vidéos que tu as envoyées toi-même.</div>
+  </div>
+
+  <div class="block">
+    <div class="block__title"><span class="block__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span> <span>Ce qu'on garde de toi</span></div>
+    <div class="block__text">Ce sont ton <strong>mouvement et ta silhouette</strong> qui sont extraits et utilisés pour l'entraînement — pas seulement le fichier vidéo brut. C'est différent de vendre une vidéo qui reste telle quelle.</div>
+  </div>
+
+  <div class="block">
+    <div class="block__title"><span class="block__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="13" y2="17"></line></svg></span> <span>Ce que tu reçois en échange</span></div>
+    <div class="block__text">Une rémunération fixe négociée par vidéo, versée sous 48h après vérification de conformité. Le volume total envisagé avec toi (au-delà du premier lot de test) te sera communiqué <strong>avant</strong> toute nouvelle demande de vidéos supplémentaires.</div>
+  </div>
+
+  <div class="checks">
+    <div class="check-row">
+      <input type="checkbox" id="age-check">
+      <label for="age-check">J'ai <strong>18 ans ou plus</strong> et je confirme cette information sur l'honneur.</label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="usage-check">
+      <label for="usage-check">J'ai compris que mes vidéos serviront à <strong>entraîner une IA générative</strong> et que le résultat pourra être <strong>utilisé commercialement</strong>.</label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="volume-check">
+      <label for="volume-check">J'ai compris que le projet vise potentiellement <strong>200 à 300 vidéos</strong> au total, au-delà du premier lot de test, et que ce volume me sera confirmé avant toute nouvelle demande.</label>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn btn--decline" id="decline-btn">Je refuse</button>
+    <button type="button" class="btn btn--accept" id="accept-btn" disabled>J'accepte et je continue</button>
+  </div>
+
+  <p class="footnote">Refuser n'a aucune conséquence négative pour toi. Tu peux aussi poser des questions avant de décider — écris-nous sur WhatsApp.</p>
+</div>
+
+<div class="card state" id="accepted-state">
+  <div class="state visible">
+    <h1 class="display" style="font-size:1.8rem;">Merci !</h1>
+    <p>Ton consentement est enregistré. Tu vas maintenant être redirigée vers l'espace d'envoi des vidéos.</p>
+  </div>
+</div>
+
+<div class="card state" id="declined-state">
+  <div class="state visible">
+    <h1 class="display" style="font-size:1.8rem;">C'est noté</h1>
+    <p>Merci de nous l'avoir dit clairement. Aucune vidéo ne sera demandée. Si tu changes d'avis ou si tu as des questions, tu peux nous recontacter à tout moment sur WhatsApp.</p>
+  </div>
+</div>
+
+<script>
+  const ageCheck = document.getElementById('age-check');
+  const usageCheck = document.getElementById('usage-check');
+  const volumeCheck = document.getElementById('volume-check');
+  const acceptBtn = document.getElementById('accept-btn');
+  const declineBtn = document.getElementById('decline-btn');
+  const consentCard = document.getElementById('consent-card');
+  const acceptedState = document.getElementById('accepted-state');
+  const declinedState = document.getElementById('declined-state');
+
+  function updateAcceptState(){
+    acceptBtn.disabled = !(ageCheck.checked && usageCheck.checked && volumeCheck.checked);
+  }
+  [ageCheck, usageCheck, volumeCheck].forEach(el => el.addEventListener('change', updateAcceptState));
+
+  acceptBtn.addEventListener('click', async () => {
+    acceptBtn.disabled = true;
+    acceptBtn.textContent = 'Enregistrement...';
+
+    try {
+      const response = await fetch('/enregistrer_consentement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          age_confirme: ageCheck.checked,
+          usage_confirme: usageCheck.checked,
+          volume_confirme: volumeCheck.checked
+        })
+      });
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur inconnue');
+      }
+
+      consentCard.style.display = 'none';
+      acceptedState.classList.add('visible');
+      setTimeout(() => {
+        window.location.href = '/?consent_id=' + encodeURIComponent(result.consent_id);
+      }, 1500);
+
+    } catch (err) {
+      acceptBtn.disabled = false;
+      acceptBtn.textContent = "J'accepte et je continue";
+      alert("Une erreur est survenue pendant l'enregistrement de ton consentement. Réessaie, ou contacte-nous sur WhatsApp si ça persiste.");
+    }
+  });
+
+  declineBtn.addEventListener('click', () => {
+    consentCard.style.display = 'none';
+    declinedState.classList.add('visible');
+  });
+</script>
+
+</body>
+</html>

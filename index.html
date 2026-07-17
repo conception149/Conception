@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace créateur — Envoi des vidéos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1A1030;
+    --surface: #2C1B4D;
+    --surface-2: #241541;
+    --coral: #FF5C8A;
+    --gold: #FFC93C;
+    --text: #F5F1FA;
+    --muted: #B8A9D9;
+    --ring: rgba(255,92,138,0.45);
+    --ok: #4ADE80;
+    --err: #FF5C8A;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family:'Manrope', sans-serif;
+    line-height:1.5;
+  }
+  .display{ font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:0.01em; line-height:0.95; }
+  .mono{ font-family:'Space Mono', monospace; letter-spacing:0.06em; text-transform:uppercase; }
+
+  /* ===== ICÔNES SVG ===== */
+  .icon-svg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-svg svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .icon-svg.large svg { width: 32px; height: 32px; stroke-width: 1.5; }
+  .icon-svg.small svg { width: 14px; height: 14px; stroke-width: 2.5; }
+
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 1.1rem 1.6rem;
+  }
+  .nav__logo{ font-family:'Anton', sans-serif; font-size:1.05rem; letter-spacing:0.03em; }
+  .nav__logo span{ color: var(--coral); }
+  .nav__tag{ font-size:0.68rem; color: var(--muted); }
+
+  .hero{ padding: 1.5rem 1.6rem 2.5rem; max-width:760px; margin:0 auto; }
+  .hero__eyebrow{ font-size:0.72rem; color: var(--gold); margin-bottom:0.9rem; }
+  .hero__title{ font-size: clamp(2rem, 6vw, 2.8rem); }
+  .hero__title em{ font-style:normal; color: var(--coral); }
+  .hero__sub{ margin-top:1rem; color: var(--muted); font-size:0.98rem; max-width:52ch; }
+
+  .rules{
+    margin-top:1.6rem;
+    background: var(--surface);
+    border-radius:20px;
+    padding:1.4rem 1.6rem;
+  }
+  .rules__title{ font-size:0.8rem; color: var(--gold); margin-bottom:0.9rem; display:flex; align-items:center; gap:0.5rem; }
+  .rules ul{ list-style:none; display:flex; flex-direction:column; gap:0.6rem; }
+  .rules li{ font-size:0.9rem; color: var(--text); display:flex; gap:0.6rem; align-items:flex-start; }
+  .rules li .icon-svg{ color: var(--coral); margin-top:0.1rem; }
+
+  main{ max-width:760px; margin:0 auto; padding: 0 1.6rem 4rem; }
+
+  .progress-card{
+    background: var(--surface);
+    border-radius:24px;
+    padding: 1.5rem 1.7rem;
+    margin-bottom:1.6rem;
+  }
+  .progress-card__top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.9rem; }
+  .progress-card__label{ font-size:0.78rem; color: var(--muted); display:flex; align-items:center; gap:0.4rem; }
+  .progress-card__count{ font-family:'Anton', sans-serif; font-size:1.6rem; }
+  .progress-card__count span{ color: var(--gold); font-size:1rem; }
+  .progress-bar{ height:10px; border-radius:999px; background: var(--surface-2); overflow:hidden; }
+  .progress-bar__fill{
+    height:100%;
+    background: linear-gradient(to right, var(--coral), var(--gold));
+    width:0%;
+    transition: width .3s ease;
+    border-radius:999px;
+  }
+  .progress-card__hint{ margin-top:0.7rem; font-size:0.78rem; color: var(--muted); }
+
+  form{ background: var(--surface); border-radius:28px; padding: clamp(1.5rem, 4vw, 2.6rem); }
+  fieldset{ border:none; padding:0; margin:0 0 2.2rem 0; }
+  fieldset:last-of-type{ margin-bottom:0; }
+  legend{
+    font-family:'Space Mono', monospace; font-size:0.72rem; text-transform:uppercase;
+    letter-spacing:0.08em; color: var(--gold); margin-bottom:1.1rem; padding:0;
+    display:flex; align-items:center; gap:0.5rem;
+  }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .field{ margin-bottom:1rem; }
+  .field:last-child{ margin-bottom:0; }
+  label{ display:block; font-size:0.82rem; color: var(--muted); margin-bottom:0.45rem; }
+  input, textarea{
+    width:100%; background: var(--surface-2); border:1px solid rgba(184,169,217,0.25);
+    border-radius:12px; padding:0.8rem 1rem; color: var(--text);
+    font-family:'Manrope', sans-serif; font-size:0.95rem; transition: border-color .15s;
+  }
+  input::placeholder, textarea::placeholder{ color: rgba(184,169,217,0.55); }
+  input:focus, textarea:focus{ outline:none; border-color: var(--coral); }
+  textarea{ resize:vertical; min-height:80px; }
+
+  .video-info{
+    background: var(--surface-2);
+    border-radius:14px;
+    padding: 1.5rem 1.2rem;
+    text-align:center;
+    border: 1px solid rgba(184,169,217,0.2);
+    margin-bottom:1rem;
+  }
+  .video-info .icon-svg{ color: var(--gold); margin-bottom:0.5rem; display:inline-flex; }
+  .video-info__title{ font-weight:700; font-size:1rem; color: var(--gold); margin-bottom:0.3rem; }
+  .video-info__text{ font-size:0.88rem; color: var(--muted); }
+  .video-info__text strong{ color: var(--text); }
+
+  .add-video{
+    display:flex; align-items:center; justify-content:center; gap:0.6rem;
+    border:1.5px dashed rgba(184,169,217,0.4);
+    border-radius:16px; padding:1.2rem; cursor:pointer;
+    font-weight:700; font-size:0.9rem; color: var(--muted);
+    transition: border-color .15s, background .15s, color .15s;
+    text-decoration: none;
+    background: transparent;
+    width:100%;
+  }
+  .add-video:hover{ 
+    border-color: var(--gold); 
+    color: var(--gold); 
+    background: rgba(255,201,60,0.05); 
+  }
+  .add-video .icon-svg{ color: currentColor; }
+
+  .field-hint{ font-size:0.76rem; color: var(--muted); margin-top:0.5rem; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;
+    font-weight:800; font-size:0.95rem; padding:0.95rem 1.8rem; border-radius:999px;
+    border:none; cursor:pointer; transition: transform .15s ease, opacity .15s ease; width:100%;
+  }
+  .btn:focus-visible{ outline: 3px solid var(--ring); outline-offset: 3px; }
+  .btn--primary{ background: var(--coral); color: #1A1030; }
+  .btn--primary:hover:not(:disabled){ transform: translateY(-2px); }
+  .btn--primary:disabled{ opacity:0.5; cursor:not-allowed; transform:none; }
+  .btn--secondary{ 
+    background: transparent; 
+    border:1px solid var(--muted); 
+    color: var(--text); 
+  }
+  .btn--secondary:hover{ border-color: var(--gold); color: var(--gold); }
+
+  .submit-row{ margin-top:2rem; display:flex; flex-direction:column; gap:0.9rem; }
+  .consent{ font-size:0.78rem; color: var(--muted); text-align:center; }
+
+  .upload-progress{
+    display:none;
+    background: var(--surface-2);
+    border-radius:16px;
+    padding:1.5rem;
+    margin-top:1rem;
+    text-align:center;
+  }
+  .upload-progress.visible{ display:block; }
+  .upload-progress__bar{
+    width:100%;
+    height:8px;
+    background: rgba(184,169,217,0.2);
+    border-radius:999px;
+    overflow:hidden;
+    margin-top:0.8rem;
+  }
+  .upload-progress__fill{
+    height:100%;
+    background: linear-gradient(to right, var(--coral), var(--gold));
+    width:0%;
+    transition: width .5s ease;
+    border-radius:999px;
+  }
+  .upload-progress__text{
+    color: var(--muted);
+    font-size:0.9rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0.5rem;
+  }
+
+  .consent-id-display{
+    background: var(--surface-2);
+    border-radius:12px;
+    padding:0.8rem 1rem;
+    font-family:'Space Mono', monospace;
+    font-size:0.8rem;
+    color: var(--gold);
+    text-align:center;
+    margin-top:0.5rem;
+    border:1px solid rgba(255,201,60,0.2);
+    word-break:break-all;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0.5rem;
+  }
+
+  footer{ padding: 2.5rem 1.6rem 2.2rem; text-align:center; color: var(--muted); font-size:0.8rem; }
+
+  /* Compteur inline buttons */
+  .count-buttons {
+    display: inline-flex;
+    gap: 0.3rem;
+    margin-left: 0.5rem;
+  }
+  .count-btn {
+    background: var(--surface-2);
+    border: 1px solid rgba(184,169,217,0.2);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 0.1rem 0.6rem;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all .2s;
+    font-family: 'Manrope', sans-serif;
+  }
+  .count-btn--plus { color: var(--gold); border-color: rgba(255,201,60,0.3); }
+  .count-btn--plus:hover { background: rgba(255,201,60,0.15); }
+  .count-btn--minus { color: var(--muted); }
+  .count-btn--minus:hover { background: rgba(255,92,138,0.15); border-color: rgba(255,92,138,0.3); }
+
+  .hint-small {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    opacity: 0.7;
+  }
+
+  @media (max-width:600px){ .grid2{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav__logo">TITOKEUR<span>(EUS)</span></div>
+  <div class="nav__tag mono">Espace privé</div>
+</nav>
+
+<header class="hero">
+  <p class="hero__eyebrow mono">Lot de test · 20 vidéos</p>
+  <h1 class="hero__title display">Envoie tes vidéos <em>ici</em></h1>
+  <p class="hero__sub">Cet espace t'a été transmis après notre échange sur WhatsApp. Envoie tes vidéos via Google Forms — le compteur ci-dessous garde ta progression.</p>
+
+  <div class="rules">
+    <p class="rules__title mono">
+      <span class="icon-svg small"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></span>
+      Rappel des conditions
+    </p>
+    <ul>
+      <li>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        Chaque vidéo dure entre <strong>4 et 5 minutes</strong>
+      </li>
+      <li>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+        Pas de bracelet ni de chaîne visible
+      </li>
+      <li>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+        Tenue près du corps (pas de vêtements amples)
+      </li>
+      <li>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+        Une chanson différente à chaque vidéo — d'actualité en Côte d'Ivoire
+      </li>
+      <li>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+        Une tenue différente à chaque vidéo
+      </li>
+      <li>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+        Fichiers acceptés : MP4, MOV, AVI, MKV, WEBM — <strong>500 Mo max</strong> par vidéo
+      </li>
+    </ul>
+  </div>
+</header>
+
+<main>
+
+  <div class="progress-card">
+    <div class="progress-card__top">
+      <span class="progress-card__label mono">
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+        Progression de l'envoi
+      </span>
+      <span class="progress-card__count"><span id="count-current">0</span> / 20</span>
+    </div>
+    <div class="progress-bar"><div class="progress-bar__fill" id="progress-fill"></div></div>
+    <p class="progress-card__hint" id="progress-hint">Les vidéos sont envoyées via Google Forms. Tu peux les ajouter progressivement.</p>
+  </div>
+
+  <form id="candidature-form" action="/send_to_drive" method="POST" enctype="multipart/form-data" novalidate>
+
+    <fieldset>
+      <legend>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        Identité
+      </legend>
+      <div class="grid2">
+        <div class="field">
+          <label for="prenom">Prénom *</label>
+          <input type="text" id="prenom" name="prenom" required placeholder="Aminata">
+        </div>
+        <div class="field">
+          <label for="nom">Nom *</label>
+          <input type="text" id="nom" name="nom" required placeholder="Koné">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="email">Email *</label>
+          <input type="email" id="email" name="email" required placeholder="toi@exemple.com">
+        </div>
+        <div class="field">
+          <label for="telephone">Téléphone *</label>
+          <input type="tel" id="telephone" name="telephone" required placeholder="07 00 00 00 00">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="age">Âge *</label>
+          <input type="number" id="age" name="age" min="13" max="99" required placeholder="21">
+        </div>
+        <div class="field">
+          <label for="ville">Ville *</label>
+          <input type="text" id="ville" name="ville" required placeholder="Abidjan">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="specialite">Spécialité *</label>
+          <input type="text" id="specialite" name="specialite" required placeholder="Danseur / Danseuse">
+        </div>
+        <div class="field">
+          <label for="precision">Précision</label>
+          <input type="text" id="precision" name="precision" placeholder="Style de danse">
+        </div>
+      </div>
+      <div class="field">
+        <label for="bio">Bio / Parcours</label>
+        <textarea id="bio" name="bio" placeholder="Parle-nous un peu de toi..."></textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span>
+        Tes vidéos (max 20)
+      </legend>
+
+      <div class="video-info">
+        <span class="icon-svg large"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="2" y1="12" x2="22" y2="12"/></svg></span>
+        <div class="video-info__title">Envoi des vidéos sur Google Forms</div>
+        <div class="video-info__text">
+          Pour envoyer tes vidéos, clique sur le bouton ci-dessous. 
+          Tu seras redirigé vers <strong>Google Forms</strong> où tu pourras uploader tes vidéos en toute sécurité.
+          <br><br>
+          <span style="font-size:0.82rem; color:var(--muted);">
+            N'oublie pas de revenir sur cette page après avoir envoyé tes vidéos pour finaliser ta candidature.
+          </span>
+        </div>
+      </div>
+
+      <a 
+        href="https://docs.google.com/forms/d/e/1FAIpQLSeRHpdsEBFQGgTpnY9gdIVEi6yl0WpyRzXfhqYhqHfM12pBSg/viewform?usp=publish-editor"
+        target="_blank"
+        class="add-video"
+        id="google-forms-btn"
+      >
+        <span class="icon-svg"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+        <span>Envoyer mes vidéos sur Google Forms</span>
+        <span style="font-size:0.7rem; opacity:0.6;">(s'ouvre dans un nouvel onglet)</span>
+      </a>
+
+      <p class="field-hint">Tu peux envoyer jusqu'à 20 vidéos sur Google Forms. Reviens ici après l'upload pour finaliser ta candidature.</p>
+
+      <div class="consent-id-display" id="consent-id-display">
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        Ton ID de consentement : <span id="consent-id-value">...</span>
+      </div>
+    </fieldset>
+
+    <input type="hidden" id="consent_id" name="consent_id" value="">
+    <input type="hidden" id="videos_uploaded_via" name="videos_uploaded_via" value="google_forms">
+
+    <fieldset>
+      <legend>
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        Message (optionnel)
+      </legend>
+      <div class="field">
+        <textarea id="message" name="message" placeholder="Une info à nous partager avant l'envoi ?"></textarea>
+      </div>
+    </fieldset>
+
+    <div class="submit-row">
+      <button type="submit" class="btn btn--primary" id="submit-btn">
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></span>
+        Finaliser ma candidature
+      </button>
+      <p class="consent">En envoyant ce formulaire, tu confirmes que les vidéos envoyées sur Google Forms respectent les conditions indiquées ci-dessus.</p>
+    </div>
+
+    <div class="upload-progress" id="upload-progress">
+      <div class="upload-progress__text" id="upload-text">
+        <span class="icon-svg small"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="12"/><polyline points="9 9 12 12 15 9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/></svg></span>
+        Envoi en cours...
+      </div>
+      <div class="upload-progress__bar">
+        <div class="upload-progress__fill" id="upload-fill"></div>
+      </div>
+    </div>
+
+  </form>
+
+</main>
+
+<footer>Titokeur(eus) · Abidjan, Côte d'Ivoire</footer>
+
+<script>
+  // ============================================================
+  // 1. VÉRIFICATION DU CONSENTEMENT
+  // ============================================================
+
+  (function checkConsent(){
+    const params = new URLSearchParams(window.location.search);
+    const consentId = params.get('consent_id');
+    if (!consentId){
+      window.location.href = '/consentement';
+      return;
+    }
+    document.getElementById('consent_id').value = consentId;
+    document.getElementById('consent-id-value').textContent = consentId;
+  })();
+
+  // ============================================================
+  // 2. CONFIGURATION
+  // ============================================================
+
+  const TARGET_COUNT = 20;
+
+  // ============================================================
+  // 3. RÉFÉRENCES DOM
+  // ============================================================
+
+  const countCurrent = document.getElementById('count-current');
+  const progressFill = document.getElementById('progress-fill');
+  const progressHint = document.getElementById('progress-hint');
+  const submitBtn = document.getElementById('submit-btn');
+  const form = document.getElementById('candidature-form');
+  const uploadProgress = document.getElementById('upload-progress');
+  const uploadFill = document.getElementById('upload-fill');
+  const uploadText = document.getElementById('upload-text');
+  const googleFormsBtn = document.getElementById('google-forms-btn');
+
+  // ============================================================
+  // 4. GESTION DE LA PROGRESSION
+  // ============================================================
+
+  function updateProgress(count) {
+    const validCount = Math.min(count, TARGET_COUNT);
+    countCurrent.textContent = validCount;
+    const pct = Math.min(100, (validCount / TARGET_COUNT) * 100);
+    progressFill.style.width = pct + '%';
+
+    if (validCount === 0){
+      progressHint.textContent = "Envoie tes vidéos via Google Forms en cliquant sur le bouton ci-dessus.";
+    } else if (validCount < TARGET_COUNT){
+      progressHint.textContent = `Tu as envoyé ${validCount} vidéo(s) sur ${TARGET_COUNT}. Continue sur Google Forms pour compléter le lot.`;
+    } else {
+      progressHint.textContent = "Lot complet ! Tu peux maintenant finaliser ta candidature.";
+    }
+  }
+
+  // ============================================================
+  // 5. COMPTEUR MANUEL
+  // ============================================================
+
+  let videoCount = parseInt(sessionStorage.getItem('titokeur_video_count') || '0');
+  updateProgress(videoCount);
+
+  // Ajouter les boutons +1 / -1
+  const countParent = document.querySelector('.progress-card__count');
+  
+  const btnContainer = document.createElement('span');
+  btnContainer.className = 'count-buttons';
+  
+  const btnPlus = document.createElement('button');
+  btnPlus.type = 'button';
+  btnPlus.className = 'count-btn count-btn--plus';
+  btnPlus.textContent = '+1';
+  btnPlus.onclick = () => {
+    if (videoCount < TARGET_COUNT) {
+      videoCount++;
+      sessionStorage.setItem('titokeur_video_count', String(videoCount));
+      updateProgress(videoCount);
+      countCurrent.style.transition = 'transform .2s';
+      countCurrent.style.transform = 'scale(1.3)';
+      setTimeout(() => countCurrent.style.transform = 'scale(1)', 200);
+    } else {
+      alert('Tu as déjà atteint le maximum de 20 vidéos !');
+    }
+  };
+
+  const btnMinus = document.createElement('button');
+  btnMinus.type = 'button';
+  btnMinus.className = 'count-btn count-btn--minus';
+  btnMinus.textContent = '-1';
+  btnMinus.onclick = () => {
+    if (videoCount > 0) {
+      videoCount--;
+      sessionStorage.setItem('titokeur_video_count', String(videoCount));
+      updateProgress(videoCount);
+    }
+  };
+
+  btnContainer.appendChild(btnPlus);
+  btnContainer.appendChild(btnMinus);
+  countParent.appendChild(btnContainer);
+
+  // Ajouter le petit message explicatif
+  const hintSmall = document.createElement('span');
+  hintSmall.className = 'hint-small';
+  hintSmall.textContent = 'Clique sur +1 après chaque envoi sur Google Forms pour suivre ta progression.';
+  document.querySelector('.progress-card__hint').after(hintSmall);
+
+  // ============================================================
+  // 6. OUVRIR GOOGLE FORMS
+  // ============================================================
+
+  googleFormsBtn.addEventListener('click', () => {
+    console.log('Ouverture de Google Forms pour l\'upload des vidéos');
+  });
+
+  // ============================================================
+  // 7. SOUMISSION DU FORMULAIRE
+  // ============================================================
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (videoCount === 0) {
+      alert('Tu n\'as pas encore envoyé de vidéos sur Google Forms. Clique sur "Envoyer mes vidéos sur Google Forms" d\'abord.');
+      return;
+    }
+
+    if (!confirm(`Tu t'apprêtes à finaliser ta candidature avec ${videoCount} vidéo(s). Es-tu sûr(e) de vouloir continuer ?`)) {
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="icon-svg small"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="12"/><polyline points="9 9 12 12 15 9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/></svg></span> Finalisation en cours...';
+
+    uploadProgress.classList.add('visible');
+    uploadFill.style.width = '0%';
+    uploadText.innerHTML = '<span class="icon-svg small"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="12"/><polyline points="9 9 12 12 15 9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/></svg></span> Préparation de la candidature...';
+
+    try {
+      const formData = new FormData();
+      const fields = ['prenom', 'nom', 'email', 'telephone', 'age', 'ville', 'specialite', 'precision', 'bio', 'message'];
+      fields.forEach(field => {
+        const value = document.getElementById(field).value;
+        if (value) formData.append(field, value);
+      });
+      formData.append('consent_id', document.getElementById('consent_id').value);
+      formData.append('video_count', videoCount);
+      formData.append('videos_uploaded_via', 'google_forms');
+
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        if (progress < 90) {
+          progress += Math.random() * 10;
+          progress = Math.min(progress, 90);
+          uploadFill.style.width = progress + '%';
+          uploadText.innerHTML = `<span class="icon-svg small"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="12"/><polyline points="9 9 12 12 15 9"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/></svg></span> Finalisation en cours... ${Math.round(progress)}%`;
+        }
+      }, 500);
+
+      const response = await fetch('/send_to_drive', {
+        method: 'POST',
+        body: formData
+      });
+
+      clearInterval(progressInterval);
+      uploadFill.style.width = '100%';
+      uploadText.innerHTML = '<span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span> Candidature finalisée ! Redirection...';
+
+      if (response.redirected) {
+        setTimeout(() => window.location.href = response.url, 1000);
+      } else if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setTimeout(() => window.location.href = '/confirmation', 1000);
+        } else {
+          throw new Error(result.error || 'Erreur inconnue');
+        }
+      } else {
+        throw new Error(`Erreur ${response.status}`);
+      }
+
+    } catch (error) {
+      console.error('Erreur:', error);
+      uploadText.innerHTML = '<span class="icon-svg small"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span> Erreur lors de la finalisation';
+      uploadFill.style.background = 'var(--err)';
+      alert(`Une erreur est survenue : ${error.message}`);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span class="icon-svg small"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></span> Réessayer';
+      setTimeout(() => {
+        uploadProgress.classList.remove('visible');
+        uploadFill.style.background = '';
+      }, 5000);
+    }
+  });
+
+  console.log('Formulaire Titokeur(eus) prêt');
+</script>
+
+</body>
+</html>
