@@ -1,537 +1,442 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cortex — Des mots à l'image</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-base:#180f2c;
+    --bg-alt:#120a22;
+    --bg-card:#231640;
+    --ink:#f7f1fb;
+    --ink-dim:#c2b3de;
+    --coral:#ff5c86;
+    --lime:#e6ff6b;
+    --violet:#b694ff;
+    --line:rgba(247,241,251,0.12);
+    --maxw:1180px;
+  }
 
-# ============================================================
-# app.py - Serveur Flask avec envoi Telegram
-# Installation : pip install flask requests python-dotenv
-# Lancement : python app.py
-# ============================================================
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg-base);
+    color:var(--ink);
+    font-family:'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{
+    font-family:'Unbounded', sans-serif;
+    margin:0;
+    line-height:1.05;
+    letter-spacing:-0.01em;
+  }
+  .mono{ font-family:'Space Mono', monospace; }
+  p{color:var(--ink-dim); line-height:1.65; margin:0;}
+  a{color:inherit;}
+  section{position:relative; padding:120px 24px;}
+  .wrap{max-width:var(--maxw); margin:0 auto; position:relative;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:'Space Mono', monospace;
+    font-size:13px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--lime); margin-bottom:22px;
+  }
+  .eyebrow::before{
+    content:''; width:8px; height:8px; border-radius:50%;
+    background:var(--coral); box-shadow:0 0 0 4px rgba(255,92,134,0.2);
+  }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:14px 26px; border-radius:100px;
+    font-family:'Plus Jakarta Sans', sans-serif; font-weight:700; font-size:15px;
+    text-decoration:none; border:1px solid transparent; cursor:pointer;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:linear-gradient(120deg, var(--coral), var(--violet)); color:#160a26; box-shadow:0 10px 30px -10px rgba(255,92,134,0.6);}
+  .btn-ghost{border-color:var(--line); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--lime);}
 
-import os
-import json
-import uuid
-import threading
-import re
-import requests
-import logging
-from flask import Flask, request, redirect, jsonify
-from werkzeug.utils import secure_filename
-from datetime import datetime, timezone
-from dotenv import load_dotenv
+  #scrub{
+    position:fixed; top:0; left:0; right:0; height:64px; z-index:100;
+    display:flex; align-items:center; padding:0 24px;
+    background:linear-gradient(180deg, rgba(18,10,34,0.92), rgba(18,10,34,0));
+    backdrop-filter:blur(6px);
+  }
+  .scrub-inner{max-width:var(--maxw); width:100%; margin:0 auto; display:flex; align-items:center; gap:22px;}
+  .wordmark{font-family:'Unbounded', sans-serif; font-weight:800; font-size:19px; letter-spacing:-0.02em; white-space:nowrap;}
+  .wordmark span{color:var(--coral);}
+  .track{ position:relative; flex:1; height:3px; background:var(--line); border-radius:3px; display:flex; align-items:center; }
+  .track-fill{ position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg, var(--coral), var(--violet)); border-radius:3px; }
+  .marker{ position:absolute; top:50%; transform:translate(-50%,-50%); width:9px; height:9px; border-radius:50%; background:var(--bg-base); border:2px solid var(--ink-dim); cursor:pointer; z-index:2; }
+  .marker.active{background:var(--lime); border-color:var(--lime);}
+  .playhead{ position:absolute; top:50%; transform:translate(-50%,-50%); width:13px; height:13px; border-radius:50%; background:var(--ink); box-shadow:0 0 0 5px rgba(247,241,251,0.15); left:0%; z-index:3; transition:left .08s linear; }
+  #timecode{font-family:'Space Mono', monospace; font-size:13px; color:var(--ink-dim); white-space:nowrap; min-width:56px;}
+  .nav-links{display:flex; gap:18px; font-size:14px; color:var(--ink-dim);}
+  .nav-links a:hover{color:var(--lime);}
+  @media (max-width:900px){ .nav-links{display:none;} }
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
+  .hero{padding-top:180px; padding-bottom:100px; overflow:hidden;}
+  .hero-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:60px; align-items:center;}
+  @media (max-width:940px){ .hero-grid{grid-template-columns:1fr;} }
+  .hero h1{font-size:clamp(38px, 5.6vw, 68px); font-weight:900;}
+  .hero h1 em{font-style:normal; color:transparent; background:linear-gradient(120deg,var(--coral),var(--lime)); -webkit-background-clip:text; background-clip:text;}
+  .hero p.lead{margin-top:24px; font-size:18px; max-width:520px;}
+  .hero-ctas{display:flex; gap:14px; margin-top:38px; flex-wrap:wrap;}
+  .status-pill{
+    display:inline-flex; align-items:center; gap:8px; margin-top:26px;
+    padding:8px 16px; border-radius:100px; border:1px solid var(--line);
+    font-family:'Space Mono', monospace; font-size:12.5px; color:var(--ink-dim);
+  }
+  .status-pill i{width:7px; height:7px; border-radius:50%; background:var(--lime); animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.3;}}
 
-load_dotenv()
+  .blob{ position:absolute; border-radius:44% 56% 62% 38% / 42% 46% 54% 58%; filter:blur(2px); opacity:0.55; z-index:0; animation:morph 12s ease-in-out infinite alternate; }
+  @keyframes morph{ 0%{border-radius:44% 56% 62% 38% / 42% 46% 54% 58%;} 50%{border-radius:58% 42% 40% 60% / 55% 60% 40% 45%;} 100%{border-radius:40% 60% 55% 45% / 60% 40% 60% 40%;} }
+  .blob-1{width:420px; height:420px; top:-80px; right:-100px; background:radial-gradient(circle at 30% 30%, var(--coral), transparent 70%);}
+  .blob-2{width:280px; height:280px; bottom:-60px; right:180px; background:radial-gradient(circle at 60% 40%, var(--violet), transparent 70%);}
 
-# --- Telegram ---
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
-CHAT_ID = os.environ.get('CHAT_ID')
+  .sample-card{ position:relative; z-index:1; background:var(--bg-card); border:1px solid var(--line); border-radius:22px; padding:22px; box-shadow:0 30px 60px -30px rgba(0,0,0,0.6); }
+  .sample-label{font-family:'Space Mono', monospace; font-size:12px; color:var(--lime); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:14px;}
+  .sample-media{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .sample-video{ aspect-ratio:16/10; border-radius:12px; background:linear-gradient(155deg, #ff5c86, #7a4fd6); position:relative; display:flex; align-items:center; justify-content:center; }
+  .sample-video::before{ content:'▶'; font-size:18px; color:rgba(255,255,255,0.85); background:rgba(0,0,0,0.25); width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .sample-audio{ aspect-ratio:16/10; border-radius:12px; background:var(--bg-base); border:1px solid var(--line); display:flex; align-items:center; padding:0 14px; }
+  .prompt-row{display:flex; align-items:flex-start; gap:10px; background:var(--bg-base); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-top:12px;}
+  .prompt-row .dot{width:8px; height:8px; border-radius:50%; background:var(--coral); flex:none; margin-top:5px;}
+  .prompt-row span{font-family:'Space Mono', monospace; font-size:12.5px; color:var(--ink-dim); line-height:1.5;}
+  .wave{display:flex; align-items:flex-end; gap:2.5px; height:100%; width:100%;}
+  .wave i{flex:1; background:var(--ink-dim); opacity:0.5; border-radius:2px; animation:bounce 1.6s ease-in-out infinite;}
+  .wave i:nth-child(odd){animation-delay:.15s;}
+  .wave i:nth-child(3n){animation-delay:.3s; background:var(--lime); opacity:0.9;}
+  @keyframes bounce{0%,100%{height:20%;} 50%{height:90%;}}
 
-if not BOT_TOKEN or not CHAT_ID:
-    raise RuntimeError(
-        "BOT_TOKEN et CHAT_ID doivent être définis dans .env"
-    )
+  .reveal{opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
 
-# --- Fichiers ---
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'mp4', 'mov', 'avi', 'mkv', 'webm'}
-MAX_FILE_SIZE = 500 * 1024 * 1024  # 500 Mo
+  .about-grid{display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start;}
+  @media (max-width:860px){ .about-grid{grid-template-columns:1fr;} }
+  .about-grid h2{font-size:clamp(30px,4vw,44px);}
+  .pillars{display:flex; flex-direction:column; gap:22px; margin-top:8px;}
+  .pillar{display:flex; gap:16px; align-items:flex-start; border-top:1px solid var(--line); padding-top:18px;}
+  .pillar .mono{color:var(--coral); font-size:13px; min-width:34px;}
+  .pillar h3{font-size:18px; margin-bottom:6px;}
 
-# --- Serveur ---
-DEBUG_MODE = False
-HOST = '0.0.0.0'
-PORT = 5000
+  section.alt{background:var(--bg-alt);}
 
-# ============================================================
-# INITIALISATION
-# ============================================================
+  .chain{display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:60px; position:relative;}
+  @media (max-width:860px){ .chain{grid-template-columns:1fr; gap:40px;} }
+  .chain::before{ content:''; position:absolute; top:26px; left:8%; right:8%; height:2px; background:repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 14px); }
+  @media (max-width:860px){ .chain::before{display:none;} }
+  .step{position:relative; padding:0 20px;}
+  .step-num{ width:52px; height:52px; border-radius:50%; background:var(--bg-card); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:'Space Mono', monospace; color:var(--lime); font-size:14px; margin-bottom:22px; position:relative; z-index:1; }
+  .step h3{font-size:21px; margin-bottom:10px;}
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 20 * MAX_FILE_SIZE + (10 * 1024 * 1024)
+  .tags{display:flex; flex-wrap:wrap; gap:12px; margin-top:34px;}
+  .tag{ padding:10px 18px; border-radius:100px; border:1px solid var(--line); font-family:'Space Mono', monospace; font-size:13px; color:var(--ink-dim); background:var(--bg-card); }
+  .tag.hi{border-color:var(--lime); color:var(--lime);}
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+  .trust-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-top:50px;}
+  @media (max-width:860px){ .trust-grid{grid-template-columns:1fr;} }
+  .trust-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:18px; padding:26px; }
+  .trust-card .mono{color:var(--lime); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; display:block; margin-bottom:12px;}
+  .trust-card h3{font-size:19px; margin-bottom:10px;}
 
-# --- Journal des consentements ---
-CONSENT_LOG_FILE = 'consentements.log'
-_consent_lock = threading.Lock()
+  .wanted{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:50px;}
+  @media (max-width:940px){ .wanted{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:640px){ .wanted{grid-template-columns:1fr;} }
+  .want-card{border-radius:18px; overflow:hidden; border:1px solid var(--line); background:var(--bg-card); padding:22px;}
+  .want-icon{width:40px; height:40px; border-radius:10px; background:linear-gradient(150deg, var(--c1), var(--c2)); margin-bottom:16px;}
+  .want-card:nth-child(1) .want-icon{--c1:#ff5c86; --c2:#2b1650;}
+  .want-card:nth-child(2) .want-icon{--c1:#b694ff; --c2:#1a1030;}
+  .want-card:nth-child(3) .want-icon{--c1:#e6ff6b; --c2:#3a1a3a;}
+  .want-card:nth-child(4) .want-icon{--c1:#4fd6c4; --c2:#241246;}
+  .want-card:nth-child(5) .want-icon{--c1:#ff9d6b; --c2:#1a1030;}
+  .want-card:nth-child(6) .want-icon{--c1:#7a8bff; --c2:#2b1650;}
+  .want-card h3{font-size:18px; margin-bottom:8px;}
+  .want-card p{font-size:14px;}
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+  .contact-grid{display:grid; grid-template-columns:1fr 1fr; gap:60px;}
+  @media (max-width:860px){ .contact-grid{grid-template-columns:1fr;} }
+  form{display:flex; flex-direction:column; gap:14px;}
+  input, textarea, select{ background:var(--bg-card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; color:var(--ink); font-family:'Plus Jakarta Sans'; font-size:15px; }
+  input:focus, textarea:focus, select:focus{outline:2px solid var(--lime); outline-offset:1px;}
+  textarea{resize:vertical; min-height:110px;}
+  label{font-size:13px; color:var(--ink-dim); font-family:'Space Mono', monospace;}
+  .checkline{display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--ink-dim);}
+  .checkline input{width:auto; padding:0; margin-top:3px;}
 
-# ============================================================
-# FONCTIONS
-# ============================================================
+  footer{padding:60px 24px 40px; border-top:1px solid var(--line);}
+  .footer-inner{max-width:var(--maxw); margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
+  .footer-inner .mono{font-size:12px; color:var(--ink-dim);}
 
-def escape_markdown(text):
-    """Échappe les caractères spéciaux Markdown pour Telegram"""
-    if not text:
-        return ''
-    # Caractères à échapper pour Telegram Markdown
-    chars_to_escape = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
-    for char in chars_to_escape:
-        text = text.replace(char, '\\' + char)
-    return text
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
 
-def clean_text(text):
-    """Nettoie le texte pour éviter les problèmes d'encodage"""
-    if not text:
-        return 'Non renseigné'
-    # Remplacer les caractères problématiques
-    text = text.replace('\n', ' ').replace('\r', '')
-    # Supprimer les caractères non imprimables
-    text = ''.join(char for char in text if ord(char) >= 32 or char == ' ')
-    return text.strip()
+<div id="scrub">
+  <div class="scrub-inner">
+    <div class="wordmark">CORTE<span>X</span></div>
+    <div class="track" id="track">
+      <div class="track-fill" id="trackFill"></div>
+      <div class="playhead" id="playhead"></div>
+    </div>
+    <div id="timecode" class="mono">00:00</div>
+    <div class="nav-links">
+      <a href="#about">Manifeste</a>
+      <a href="#how">Collecte</a>
+      <a href="#trust">Confiance</a>
+      <a href="#stack">Stack</a>
+      <a href="#wanted">On cherche</a>
+      <a href="#contact">Contribuer</a>
+    </div>
+  </div>
+</div>
 
-def allowed_file(filename):
-    """Vérifier si l'extension du fichier est autorisée"""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+<section class="hero" id="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow mono">00:00 — Ouverture</div>
+      <h1>On entraîne l'IA<br>qui tournera <em>l'intro.</em></h1>
+      <p class="lead">Cortex construit un système qui transforme un simple prompt en clip vidéo d'ouverture pour un morceau, à partir de plusieurs modèles IA open source assemblés. On est en phase de collecte de données : on rassemble des clips vidéo, des morceaux et leurs descriptions pour entraîner le modèle.</p>
+      <div class="hero-ctas">
+        <a href="#contact" class="btn btn-primary">Contribuer des données</a>
+        <a href="#trust" class="btn btn-ghost">Comment on protège vos données</a>
+      </div>
+      <div class="status-pill"><i></i>Statut actuel : collecte de données — pas encore de modèle entraîné</div>
+    </div>
+    <div class="sample-card reveal">
+      <div class="sample-label">Format d'une contribution</div>
+      <div class="sample-media">
+        <div class="sample-video"></div>
+        <div class="sample-audio"><div class="wave">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div></div>
+      </div>
+      <div class="prompt-row">
+        <div class="dot"></div>
+        <span>Prompt associé : « néon rose, ville pluvieuse au ralenti, caméra qui s'élève »</span>
+      </div>
+    </div>
+  </div>
+</section>
 
-def get_client_ip():
-    """Récupérer l'IP réelle du client"""
-    forwarded = request.headers.get('X-Forwarded-For', '')
-    if forwarded:
-        return forwarded.split(',')[0].strip()
-    return request.remote_addr or 'inconnu'
+<section id="about" class="alt">
+  <div class="wrap about-grid">
+    <div class="reveal">
+      <div class="eyebrow mono">00:14 — Qui sommes-nous</div>
+      <h2>On code au carrefour<br>de l'image et du son.</h2>
+      <p style="margin-top:22px; font-size:16px;">Cortex est un petit collectif qui construit sur la recherche IA open source, pour donner aux musiciens et créateurs un outil qui génère automatiquement l'ouverture visuelle de leurs morceaux à partir d'un prompt. On en est à la première étape, la plus importante : réunir des données de qualité pour entraîner le modèle correctement, plutôt que de brûler les étapes.</p>
+    </div>
+    <div class="pillars reveal">
+      <div class="pillar">
+        <span class="mono">01</span>
+        <div><h3>Transparence d'abord</h3><p>On dit clairement où on en est : pas de fausse démo, pas de promesse qu'on ne peut pas tenir aujourd'hui.</p></div>
+      </div>
+      <div class="pillar">
+        <span class="mono">02</span>
+        <div><h3>Open source</h3><p>La pipeline s'appuiera sur des modèles ouverts, et on republiera nos améliorations à la communauté.</p></div>
+      </div>
+      <div class="pillar">
+        <span class="mono">03</span>
+        <div><h3>Respect des contributeurs</h3><p>Chaque personne qui nous donne des données garde ses droits et sait précisément à quoi ça sert.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-def enregistrer_consentement(age_confirme, usage_confirme, volume_confirme):
-    """Enregistre une preuve de consentement horodatée"""
-    consent_id = str(uuid.uuid4())
-    record = {
-        'consent_id': consent_id,
-        'horodatage_utc': datetime.now(timezone.utc).isoformat(),
-        'ip': get_client_ip(),
-        'user_agent': request.headers.get('User-Agent', 'inconnu'),
-        'age_confirme_18_plus': bool(age_confirme),
-        'usage_ia_confirme': bool(usage_confirme),
-        'volume_200_300_confirme': bool(volume_confirme),
-    }
+<section id="how">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow mono">00:38 — La collecte</div>
+      <h2 style="font-size:clamp(30px,4vw,44px); max-width:640px;">Trois étapes pour transformer votre clip en donnée d'entraînement.</h2>
+    </div>
+    <div class="chain">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <h3>Vous proposez</h3>
+        <p>Un clip vidéo, le morceau associé, et une description du style visuel — l'équivalent du prompt qui aurait pu le générer.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <h3>On vérifie</h3>
+        <p>On contrôle les droits, la qualité technique, et on annote la donnée avant qu'elle entre dans le jeu d'entraînement.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <h3>Ça nourrit le modèle</h3>
+        <p>La donnée sert uniquement à entraîner Cortex — jamais revendue, jamais réutilisée pour autre chose sans votre accord.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    with _consent_lock:
-        with open(CONSENT_LOG_FILE, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(record, ensure_ascii=False) + '\n')
+<section id="trust" class="alt">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow mono">01:00 — Pourquoi nous faire confiance</div>
+      <h2 style="font-size:clamp(30px,4vw,44px); max-width:640px;">On sait qu'on vous demande de la confiance avant d'avoir un produit fini.</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-card reveal">
+        <span class="mono">Droits</span>
+        <h3>Vous restez propriétaire</h3>
+        <p>Vous gardez tous les droits sur vos clips et morceaux. On vous demande une licence limitée à l'entraînement, jamais une cession.</p>
+      </div>
+      <div class="trust-card reveal">
+        <span class="mono">Usage</span>
+        <h3>Une seule finalité</h3>
+        <p>Vos données servent uniquement à entraîner le modèle Cortex. Pas de revente, pas de partage avec des tiers non annoncés.</p>
+      </div>
+      <div class="trust-card reveal">
+        <span class="mono">Sécurité</span>
+        <h3>Accès restreint</h3>
+        <p>Stockage chiffré, accès limité à l'équipe cœur du projet, suppression possible sur simple demande.</p>
+      </div>
+      <div class="trust-card reveal">
+        <span class="mono">Traçabilité</span>
+        <h3>Crédit &amp; suivi</h3>
+        <p>Chaque contributeur peut savoir où en est le projet et demander le retrait de ses données à tout moment.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    logger.info(f"✅ Consentement enregistré : {consent_id}")
-    return consent_id
+<section id="stack">
+  <div class="wrap reveal">
+    <div class="eyebrow mono">01:20 — La stack</div>
+    <h2 style="font-size:clamp(30px,4vw,44px); max-width:600px;">Une pipeline pensée, pas encore entraînée.</h2>
+    <p style="margin-top:20px; max-width:560px;">Le modèle final combinera plusieurs familles de briques open source, chacune spécialisée sur une étape du clip. Liste à personnaliser avec vos vraies briques :</p>
+    <div class="tags">
+      <span class="tag hi">Génération vidéo</span>
+      <span class="tag">Text-to-image</span>
+      <span class="tag">Interpolation de mouvement</span>
+      <span class="tag hi">Synthèse & analyse audio</span>
+      <span class="tag">Upscaling</span>
+      <span class="tag">Colorimétrie automatique</span>
+      <span class="tag">Segmentation & rotoscopie</span>
+    </div>
+  </div>
+</section>
 
-def send_video_to_telegram(file_path, caption):
-    """Envoie une vidéo vers Telegram"""
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendVideo"
-    
-    try:
-        with open(file_path, 'rb') as f:
-            files = {'video': f}
-            data = {
-                'chat_id': CHAT_ID,
-                'caption': caption[:1024],  # Limite Telegram
-                'parse_mode': 'Markdown'
-            }
-            response = requests.post(url, data=data, files=files, timeout=60)
-            
-        if response.status_code == 200:
-            logger.info(f"✅ Vidéo envoyée à Telegram")
-            return True
-        else:
-            logger.error(f"❌ Erreur envoi vidéo : {response.text}")
-            return False
-            
-    except Exception as e:
-        logger.error(f"❌ Exception envoi vidéo : {e}")
-        return False
+<section id="wanted" class="alt">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow mono">01:45 — Ce qu'on recherche</div>
+      <h2 style="font-size:clamp(30px,4vw,44px); max-width:600px;">Les contributions qui nous aident le plus.</h2>
+      <p style="margin-top:16px; max-width:560px;">Pas besoin d'un studio pro. On cherche surtout de la variété et des descriptions précises.</p>
+    </div>
+    <div class="wanted">
+      <div class="want-card reveal"><div class="want-icon"></div><h3>Clips musicaux courts</h3><p>Intros, teasers ou extraits de 5 à 30 secondes, avec le morceau associé.</p></div>
+      <div class="want-card reveal"><div class="want-icon"></div><h3>Descriptions précises</h3><p>Le style visuel, la lumière, le mouvement de caméra — le plus détaillé possible.</p></div>
+      <div class="want-card reveal"><div class="want-icon"></div><h3>Ambiances variées</h3><p>Néon urbain, nature, studio, animation — la diversité compte plus que le volume.</p></div>
+      <div class="want-card reveal"><div class="want-icon"></div><h3>Morceaux avec structure claire</h3><p>Un rythme et une intro identifiables aident le modèle à apprendre le calage.</p></div>
+      <div class="want-card reveal"><div class="want-icon"></div><h3>Droits clairs</h3><p>Contenus que vous avez créés ou pour lesquels vous avez l'autorisation de les partager.</p></div>
+      <div class="want-card reveal"><div class="want-icon"></div><h3>Retours critiques</h3><p>Même sans clip à donner, vos retours sur le projet et son sérieux nous aident.</p></div>
+    </div>
+  </div>
+</section>
 
-def send_message_to_telegram(text):
-    """Envoie un message texte vers Telegram"""
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    
-    # Nettoyer le texte
-    clean_text_content = clean_text(text)
-    
-    data = {
-        'chat_id': CHAT_ID,
-        'text': clean_text_content,
-        'parse_mode': 'Markdown'
-    }
+<section id="contact">
+  <div class="wrap contact-grid">
+    <div class="reveal">
+      <div class="eyebrow mono">02:05 — Contribuer</div>
+      <h2 style="font-size:clamp(30px,4vw,44px);">Envoyez-nous vos premières données.</h2>
+      <p style="margin-top:20px; max-width:460px;">Bêta-testeurs, contributeurs de données, artistes ou curieux de l'open source : dites-nous ce que vous pouvez partager, on revient vers vous rapidement.</p>
+    </div>
+    <form class="reveal" onsubmit="return false;">
+      <input type="text" placeholder="Ton nom" required>
+      <input type="email" placeholder="Ton email" required>
+      <textarea placeholder="Décris ce que tu peux fournir (clips, morceaux, prompts...) et un lien si tu en as"></textarea>
+      <label class="checkline"><input type="checkbox" required> Je confirme être l'auteur ou avoir l'autorisation de partager ce contenu à des fins d'entraînement.</label>
+      <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Envoyer</button>
+    </form>
+  </div>
+</section>
 
-    try:
-        response = requests.post(url, data=data, timeout=30)
-        if response.status_code == 200:
-            logger.info("✅ Message Telegram envoyé")
-            return True
-        else:
-            logger.error(f"❌ Erreur envoi message : {response.text}")
-            # Réessayer sans Markdown si erreur
-            if 'parse' in response.text:
-                logger.info("🔄 Réessai sans Markdown...")
-                data['parse_mode'] = None
-                response2 = requests.post(url, data=data, timeout=30)
-                if response2.status_code == 200:
-                    logger.info("✅ Message envoyé sans Markdown")
-                    return True
-            return False
-    except Exception as e:
-        logger.error(f"❌ Exception envoi message : {e}")
-        return False
+<footer>
+  <div class="footer-inner">
+    <div class="wordmark" style="font-size:16px;">CORTE<span style="color:var(--coral);">X</span></div>
+    <span class="mono">Phase actuelle : collecte de données — construit sur des modèles open source</span>
+  </div>
+</footer>
 
-def format_telegram_message(data):
-    """Construire le message formaté pour Telegram"""
-    # Nettoyer toutes les entrées
-    prenom = clean_text(data.get('prenom', 'Non renseigné'))
-    nom = clean_text(data.get('nom', 'Non renseigné'))
-    email = clean_text(data.get('email', 'Non renseigné'))
-    telephone = clean_text(data.get('telephone', 'Non renseigné'))
-    age = clean_text(data.get('age', 'Non renseigné'))
-    ville = clean_text(data.get('ville', 'Non renseigné'))
-    specialite = clean_text(data.get('specialite', 'Non renseigné'))
-    precision = clean_text(data.get('precision', ''))
-    bio = clean_text(data.get('bio', ''))
-    message = clean_text(data.get('message', ''))
-    consent_id = clean_text(data.get('consent_id', 'Non renseigné'))
-    video_count = data.get('video_count', 0)
-    videos_uploaded_via = clean_text(data.get('videos_uploaded_via', 'telegram'))
+<script>
+  const sections = [
+    {id:'hero', label:'00:00'},
+    {id:'about', label:'00:14'},
+    {id:'how', label:'00:38'},
+    {id:'trust', label:'01:00'},
+    {id:'stack', label:'01:20'},
+    {id:'wanted', label:'01:45'},
+    {id:'contact', label:'02:05'}
+  ];
+  const track = document.getElementById('track');
+  const trackFill = document.getElementById('trackFill');
+  const playhead = document.getElementById('playhead');
+  const timecode = document.getElementById('timecode');
 
-    # Construction du message (format simple, sans Markdown complexe)
-    text = "📥 NOUVELLE CANDIDATURE TITOKEUR(EUS)\n\n"
-    text += f"📅 Date : {datetime.now().strftime('%d/%m/%Y à %H:%M')}\n\n"
+  function layoutMarkers(){
+    document.querySelectorAll('.marker').forEach(m => m.remove());
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    sections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if(!el) return;
+      const pct = Math.min(100, (el.offsetTop / docHeight) * 100);
+      const m = document.createElement('div');
+      m.className = 'marker';
+      m.style.left = pct + '%';
+      m.dataset.id = s.id;
+      m.addEventListener('click', () => el.scrollIntoView({behavior:'smooth'}));
+      track.appendChild(m);
+    });
+  }
 
-    text += "👤 Identité\n"
-    text += f"  Nom : {prenom} {nom}\n"
-    text += f"  Email : {email}\n"
-    text += f"  Téléphone : {telephone}\n"
-    text += f"  Âge : {age} ans\n"
-    text += f"  Ville : {ville}\n\n"
+  function fmt(totalSeconds){
+    const m = Math.floor(totalSeconds/60).toString().padStart(2,'0');
+    const s = Math.floor(totalSeconds%60).toString().padStart(2,'0');
+    return m+':'+s;
+  }
 
-    text += "🎭 Profil artistique\n"
-    text += f"  Spécialité : {specialite}"
-    if precision:
-        text += f" ({precision})"
-    text += "\n"
-    if bio:
-        text += f"  Bio : {bio}\n\n"
+  function onScroll(){
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
+    trackFill.style.width = pct + '%';
+    playhead.style.left = pct + '%';
+    timecode.textContent = fmt(pct/100 * 145);
 
-    if message:
-        text += f"💬 Message : {message}\n\n"
+    let activeId = sections[0].id;
+    sections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if(el && window.scrollY + 100 >= el.offsetTop) activeId = s.id;
+    });
+    document.querySelectorAll('.marker').forEach(m => {
+      m.classList.toggle('active', m.dataset.id === activeId);
+    });
+  }
 
-    text += f"📹 Vidéos : {video_count} vidéo(s)\n"
-    text += f"📤 Envoi via : {videos_uploaded_via}\n\n"
-    
-    text += f"🔏 Consent ID : {consent_id}"
+  window.addEventListener('load', () => { layoutMarkers(); onScroll(); });
+  window.addEventListener('resize', layoutMarkers);
+  window.addEventListener('scroll', onScroll);
 
-    return text
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+  }, {threshold:0.15});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
 
-# ============================================================
-# ROUTES FLASK
-# ============================================================
-
-@app.route('/')
-def index():
-    """Page d'accueil - affiche le formulaire"""
-    try:
-        with open('index.html', 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        return """
-        <!DOCTYPE html>
-        <html>
-        <head><title>Erreur</title></head>
-        <body style="font-family: sans-serif; text-align: center; padding: 2rem;">
-            <h1>❌ Erreur</h1>
-            <p>Le fichier <code>index.html</code> est introuvable.</p>
-        </body>
-        </html>
-        """, 404
-
-@app.route('/consentement')
-def page_consentement():
-    """Page de consentement"""
-    try:
-        with open('consentement.html', 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        return "Fichier consentement.html introuvable.", 404
-
-@app.route('/confirmation')
-def confirmation():
-    """Page de confirmation après soumission"""
-    try:
-        with open('confirmation.html', 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        return """
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Confirmation</title>
-            <style>
-                *{margin:0;padding:0;box-sizing:border-box;}
-                body{font-family:'Segoe UI',sans-serif;background:linear-gradient(145deg,#f0f6fb,#dce8f2);
-                     min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
-                .card{max-width:600px;background:white;border-radius:40px;padding:3rem;text-align:center;box-shadow:0 30px 50px rgba(0,0,0,0.1);}
-                .icon{font-size:4rem;margin-bottom:1rem;}
-                h1{color:#1a4b6d;font-size:2rem;margin-bottom:0.5rem;}
-                p{color:#2c4e6e;font-size:1.1rem;line-height:1.6;margin-bottom:1.5rem;}
-                .btn{display:inline-block;background:#1a4b6d;color:white;padding:0.8rem 2.5rem;
-                     border-radius:60px;text-decoration:none;font-weight:700;}
-                .btn:hover{background:#0f3a55;}
-                .details{text-align:left;background:#f5f9fe;border-radius:16px;padding:1.2rem;
-                         margin:1.5rem 0;font-size:0.9rem;color:#1a3f59;}
-            </style>
-        </head>
-        <body>
-            <div class="card">
-                <div class="icon">✅</div>
-                <h1>Merci pour votre candidature !</h1>
-                <p>Vos informations ont été envoyées avec succès.</p>
-                <div class="details">
-                    <strong>📌 Prochaines étapes :</strong><br>
-                    • Nous examinerons votre candidature sous 48h<br>
-                    • Vous recevrez un retour sur votre email<br>
-                    • Si votre profil est retenu, nous vous contacterons
-                </div>
-                <a href="/" class="btn">⬅ Retour à l'accueil</a>
-            </div>
-        </body>
-        </html>
-        """
-
-@app.route('/enregistrer_consentement', methods=['POST'])
-def route_enregistrer_consentement():
-    """Enregistre le consentement et retourne consent_id"""
-    try:
-        data = request.get_json(force=True, silent=True) or {}
-
-        age_confirme = data.get('age_confirme', False)
-        usage_confirme = data.get('usage_confirme', False)
-        volume_confirme = data.get('volume_confirme', False)
-
-        if not (age_confirme and usage_confirme and volume_confirme):
-            return jsonify({
-                'success': False,
-                'error': "Les trois confirmations sont requises."
-            }), 400
-
-        consent_id = enregistrer_consentement(age_confirme, usage_confirme, volume_confirme)
-        return jsonify({'success': True, 'consent_id': consent_id})
-
-    except Exception as e:
-        logger.error(f"❌ Erreur enregistrement consentement : {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/send_to_drive', methods=['POST'])
-def send_to_telegram():
-    """Traite le formulaire et envoie à Telegram"""
-    
-    logger.info("📥 Réception d'une nouvelle candidature")
-    
-    try:
-        # ============================================================
-        # 1. RÉCUPÉRATION DES DONNÉES
-        # ============================================================
-        
-        prenom = request.form.get('prenom', 'Non renseigné')
-        nom = request.form.get('nom', 'Non renseigné')
-        email = request.form.get('email', 'Non renseigné')
-        telephone = request.form.get('telephone', 'Non renseigné')
-        age = request.form.get('age', 'Non renseigné')
-        ville = request.form.get('ville', 'Non renseigné')
-        specialite = request.form.get('specialite', 'Non renseigné')
-        precision = request.form.get('precision', '')
-        bio = request.form.get('bio', '')
-        message = request.form.get('message', '')
-        consent_id = request.form.get('consent_id', '')
-        
-        # Nouveaux champs pour le mode Google Forms
-        video_count = request.form.get('video_count', 0)
-        videos_uploaded_via = request.form.get('videos_uploaded_via', 'telegram')
-
-        # Vérification du consentement
-        if not consent_id:
-            logger.warning("⚠️ Envoi refusé : aucun consent_id fourni")
-            return "❌ Consentement requis. Merci de passer d'abord par la page de consentement.", 400
-
-        # ============================================================
-        # 2. RÉCUPÉRATION DES VIDÉOS (si envoyées directement)
-        # ============================================================
-        
-        video_count_uploaded = 0
-        video_files = []
-        
-        # Vérifier s'il y a des vidéos dans la requête
-        video_keys = sorted(
-            [k for k in request.files.keys() if k.startswith('video')],
-            key=lambda k: int(''.join(filter(str.isdigit, k)) or 0)
-        )
-        
-        for video_key in video_keys:
-            video = request.files.get(video_key)
-            if not video or not video.filename:
-                continue
-                
-            if not allowed_file(video.filename):
-                logger.warning(f"⚠️ Extension non autorisée : {video.filename}")
-                continue
-            
-            # Sauvegarder temporairement
-            filename = secure_filename(video.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            video.save(filepath)
-            
-            # Vérifier la taille
-            file_size = os.path.getsize(filepath)
-            if file_size > MAX_FILE_SIZE:
-                os.remove(filepath)
-                logger.warning(f"⚠️ Vidéo trop lourde : {file_size/1024/1024:.1f} Mo")
-                continue
-            
-            video_files.append((filepath, filename))
-            video_count_uploaded += 1
-
-        # ============================================================
-        # 3. ENVOI À TELEGRAM
-        # ============================================================
-        
-        # Construire le message
-        final_video_count = int(video_count) if video_count and int(video_count) > 0 else video_count_uploaded
-        
-        data = {
-            'prenom': prenom,
-            'nom': nom,
-            'email': email,
-            'telephone': telephone,
-            'age': age,
-            'ville': ville,
-            'specialite': specialite,
-            'precision': precision,
-            'bio': bio,
-            'message': message,
-            'consent_id': consent_id,
-            'video_count': final_video_count,
-            'videos_uploaded_via': videos_uploaded_via if videos_uploaded_via else 'telegram'
-        }
-        
-        # Envoyer le message texte
-        text = format_telegram_message(data)
-        
-        # Log du message avant envoi
-        logger.info(f"📤 Envoi du message : {text[:200]}...")
-        
-        success = send_message_to_telegram(text)
-        
-        if not success:
-            logger.warning("⚠️ Échec de l'envoi du message, mais on continue")
-        
-        # Envoyer les vidéos (si présentes)
-        for filepath, filename in video_files:
-            caption = f"Vidéo de {prenom} {nom}\nID: {consent_id[:8]}..."
-            send_video_to_telegram(filepath, caption)
-            
-            # Nettoyer le fichier temporaire
-            try:
-                os.remove(filepath)
-            except Exception as e:
-                logger.warning(f"⚠️ Impossible de supprimer {filepath}: {e}")
-        
-        # ============================================================
-        # 4. LOG LOCAL
-        # ============================================================
-        
-        log_text = f"""
-{"="*60}
-📥 NOUVELLE CANDIDATURE TITOKEUR(EUS)
-📅 Date : {datetime.now().strftime('%d/%m/%Y à %H:%M')}
-
-👤 Identité
-  • Nom : {prenom} {nom}
-  • Email : {email}
-  • Téléphone : {telephone}
-  • Âge : {age} ans
-  • Ville : {ville}
-
-📹 Vidéos : {final_video_count} vidéo(s) ({videos_uploaded_via})
-🔏 Consent ID : {consent_id}
-{"="*60}
-"""
-        with open('candidatures.log', 'a', encoding='utf-8') as f:
-            f.write(log_text + "\n")
-        
-        logger.info(f"✅ Candidature traitée : {final_video_count} vidéos, ID: {consent_id[:8]}...")
-        
-        return redirect('/confirmation')
-
-    except Exception as e:
-        logger.error(f"❌ Erreur générale : {e}")
-        import traceback
-        traceback.print_exc()
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head><title>Erreur</title></head>
-        <body style="font-family: sans-serif; text-align: center; padding: 2rem;">
-            <h1>❌ Une erreur est survenue</h1>
-            <p>Veuillez réessayer ou contacter l'administrateur.</p>
-            <p style="color: #c44536; font-size: 0.9rem;">Erreur : {str(e)}</p>
-            <a href="/">⬅ Retour à l'accueil</a>
-        </body>
-        </html>
-        """, 500
-
-# ============================================================
-# ROUTES API (pour les statistiques)
-# ============================================================
-
-@app.route('/api/stats')
-def api_stats():
-    """Retourne des statistiques sur les candidatures"""
-    try:
-        if os.path.exists('candidatures.log'):
-            with open('candidatures.log', 'r', encoding='utf-8') as f:
-                content = f.read()
-                count = content.count('NOUVELLE CANDIDATURE')
-        else:
-            count = 0
-            
-        return jsonify({
-            'status': 'ok',
-            'total_candidatures': count,
-            'server_time': datetime.now(timezone.utc).isoformat()
-        })
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-@app.route('/api/videos')
-def api_videos():
-    """Liste des vidéos (placeholder)"""
-    return jsonify({
-        'status': 'info',
-        'message': 'Les vidéos sont envoyées via Telegram'
-    })
-
-# ============================================================
-# LANCEMENT DU SERVEUR
-# ============================================================
-
-if __name__ == '__main__':
-    print("=" * 50)
-    print("🚀 SERVEUR FLASK - TITOKEUR(EUS)")
-    print("=" * 50)
-    print(f"📁 Dossier upload : {UPLOAD_FOLDER}")
-    print(f"🤖 Bot Token : {BOT_TOKEN[:10]}...")
-    print(f"👤 Chat ID : {CHAT_ID}")
-    print(f"📍 Local : http://127.0.0.1:{PORT}")
-    print("=" * 50)
-    print("📋 Routes disponibles :")
-    print("  GET  /                   - Formulaire d'envoi")
-    print("  GET  /consentement       - Page de consentement")
-    print("  GET  /confirmation       - Page de confirmation")
-    print("  POST /enregistrer_consentement - Enregistrer le consentement")
-    print("  POST /send_to_drive      - Envoyer les vidéos vers Telegram")
-    print("  GET  /api/stats          - Statistiques")
-    print("=" * 50)
-    print("🔴 Appuyez sur Ctrl+C pour arrêter")
-    print("=" * 50)
-    
-    port = int(os.environ.get('PORT', PORT))
-    app.run(host=HOST, port=port, debug=DEBUG_MODE)
+</body>
+</html>
